@@ -1,0 +1,21 @@
+<div class="h-screen flex flex-col">
+  <app-site-header
+    class="flex-shrink-0"
+    siteTitle="NaipyM"
+    [menuButton]="[
+      {routerLink: '/artists',       label: '絵師一覧'},
+      {routerLink: '/tags',          label: 'タグ一覧'},
+      {routerLink: '/batch',         label: 'バッチ操作'},
+      {routerLink: '/batch-manager', label: 'バッチ管理'},
+      {routerLink: '/tools',         label: 'ツール'},
+      {routerLink: '/sandbox',       label: 'Sandbox'}
+    ]">
+    <ng-container *ngTemplateOutlet="sideMenuContent()"></ng-container>
+  </app-site-header>
+  
+  <div class="flex-1 overflow-y-auto">
+    <div class="p-2 sm:p-6">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
