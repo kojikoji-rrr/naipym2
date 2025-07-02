@@ -27,7 +27,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   thLabels: {[key:string]: FlexibleTableColumn} = {
     'domain'         :{label:'ドメイン', colClass:"text-xs",  rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'tag'            :{label:'タグ',     colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellCopyComponent },
-    'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
+    'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined},
     'artist_name'    :{label:'絵師名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellCopyComponent },
     'other_names'    :{label:'他名称',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'post_count'     :{label:'ポスト数', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
@@ -44,6 +44,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     'gened_at'       :{label:'生成日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_gened_at'  :{label:'最終生成', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined }
   }
+  // trackByキー
+  trackByKeys: Array<string> = ['tag', 'artist_id'];
   // 非表示カラム
   hideColumns: Array<string> = ["artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
   // 総件数

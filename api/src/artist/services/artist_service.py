@@ -56,24 +56,27 @@ def get_image_type(path: str) -> str:
     mime_type, _ = mimetypes.guess_type(path)
     return mime_type or 'application/octet-stream'
 
-def get_image_data(path: str, is_thumbnail: bool) -> str:
-    img = Image.open(path)
-    if is_thumbnail:
-        img.thumbnail((250, 250), Image.Resampling.LANCZOS)
-    
-    # PIL ImageをBase64に変換
-    buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
-    buffer.seek(0)
-    
-    return base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-def get_video_data(path: str, is_thumbnail: bool) -> str:
+def get_image_content(path: str, is_thumbnail: bool) -> bytes:
     if not is_thumbnail:
-        # フルサイズ動画ファイルをそのままBase64エンコード
+        with open(path, 'rb') as f:
+            return f.read()
+    else:
+        img = Image.open(path)
+        img.thumbnail((250, 250), Image.Resampling.LANCZOS)
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        buffer.seek(0)
+        return buffer.getvalue()
+
+def get_image_data(path: str, is_thumbnail: bool) -> str:
+    content = get_image_content(path, is_thumbnail)
+    return base64.b64encode(content).decode('utf-8')
+
+def get_video_content(path: str, is_thumbnail: bool) -> bytes:
+    if not is_thumbnail:
+        # フルサイズ動画ファイルをそのまま返す
         with open(path, 'rb') as video_file:
-            video_content = video_file.read()
-        return base64.b64encode(video_content).decode('utf-8')
+            return video_file.read()
     
     # サムネイル生成
     cap = cv2.VideoCapture(path)
@@ -89,12 +92,14 @@ def get_video_data(path: str, is_thumbnail: bool) -> str:
         # アスペクト比を維持してリサイズ
         img.thumbnail((250, 250), Image.Resampling.LANCZOS)
         
-        # PIL ImageをBase64に変換
+        # PIL Imageをバイト列に変換
         buffer = io.BytesIO()
         img.save(buffer, format='PNG')
         buffer.seek(0)
-        
-        return base64.b64encode(buffer.getvalue()).decode('utf-8')
-        
+        return buffer.getvalue()
     finally:
         cap.release()
+
+def get_video_data(path: str, is_thumbnail: bool) -> str:
+    content = get_video_content(path, is_thumbnail)
+    return base64.b64encode(content).decode('utf-8')

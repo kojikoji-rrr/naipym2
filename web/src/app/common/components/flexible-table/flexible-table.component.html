@@ -18,7 +18,7 @@
     @if (data.length===0) {
       <tr><td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length"> --- No data --- </td></tr>
     } @else {
-      @for (row of data; track row) {
+      @for (row of data; track trackByFn($index, row)) {
         <tr class="hover:bg-gray-50">
           @for (key of getVisibleColumns(); track key) {
             <td

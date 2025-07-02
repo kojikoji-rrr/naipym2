@@ -1,14 +1,17 @@
 import { Component, Inject } from '@angular/core';
+import { InjectedData } from '../../../common/components/flexible-table/flexible-table.component';
 
 @Component({
   selector: 'app-table-cell-link',
-  template: `table-cell-link.component.html`,
+  templateUrl: "table-cell-link.component.html",
   standalone: true
 })
 export class TableCellLinkComponent {
+  public value?:any;
+
   constructor(
-    @Inject('data') public data: {key:string, row:{[key:string]: any}}
+    @Inject('data') public data: InjectedData
   ) {
-    const value = data.row[data.key];
+    this.value = data.row[data.key];
   }
 }

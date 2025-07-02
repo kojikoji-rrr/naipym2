@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector, ViewChildren } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 
 // 列定義
@@ -18,6 +18,14 @@ export interface FlexibleTableColumn {
   width?: string;
 }
 
+// Injectorデータ定義
+export interface InjectedData {
+  key: string;
+  row: { [key: string]: any };
+  register: (instance: any) => void;
+  unregister: () => void;
+}
+
 @Component({
   selector: 'app-flexible-table',
   imports: [CommonModule],
@@ -30,17 +38,20 @@ export class FlexibleTableComponent {
   @Input() thLabels: {[key:string]: FlexibleTableColumn} = {}
   // 非表示カラム
   @Input() hideColumns: Array<string> = [];
+  // キー項目
+  @Input() trackByKeys: Array<string> = [];
   // ソートイベント（未設定の場合デフォルト処理）
   @Output() sortEvent = new EventEmitter<{sortColumn: {[key:string]: boolean}, data: Array<{[key:string]: any}>}>();
   // ソート処理
   sortColumn: {[key:string]: boolean} = {}
+  // 列コンポーネント
+  private rowComponents = new Map<any, Map<string, any>>();
 
   constructor(
     public injector: Injector,
     private sanitizer: DomSanitizer
   ) {}
 
-  // 表示対象のカラムキーを取得
   getVisibleColumns(): string[] {
     if (this.data.length === 0) return [];
     
@@ -54,7 +65,6 @@ export class FlexibleTableComponent {
     return allKeys.filter(key => !this.hideColumns.includes(key));
   }
 
-  // ソート処理
   onChangeSort(key: string) {
     // ソートキー追加
     if (!this.sortColumn.hasOwnProperty(key)) {
@@ -76,7 +86,7 @@ export class FlexibleTableComponent {
     }
   }
 
-  private defaultSort() {
+  defaultSort() {
     // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
     this.data.sort((a, b) => {
       for (const key in this.sortColumn) {
@@ -89,21 +99,45 @@ export class FlexibleTableComponent {
       return 0;
     });
   }
+  
+  trackByFn(index: number, row: { [key: string]: any }): any {
+    if (this.trackByKeys && this.trackByKeys.length > 0) {
+      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
+      return keyValue ?? index;
+    }
+    return index;
+  }
 
-  public createInjector(key:string, row:{[key:string]:any}): Injector {
-    const data: any = {key:key, row:row};
+  getRowComponent(rowTrackByKeys: Array<any>, column: string): any | undefined {
+    return this.rowComponents.get(rowTrackByKeys.join('_'))?.get(column);
+  }
+
+  createInjector(key:string, row:{[key:string]:any}): Injector {
+    const trackByValue = this.trackByFn(0, row);
+    const data: InjectedData = {
+      key: key,
+      row: row,
+      register: (instance: any) => {
+        if (!this.rowComponents.has(trackByValue)) {
+          this.rowComponents.set(trackByValue, new Map());
+        }
+        this.rowComponents.get(trackByValue)!.set(key, instance);
+      },
+      unregister: () => {
+        this.rowComponents.get(trackByValue)?.delete(key);
+      },
+    };
     return Injector.create({
       providers: [{provide:'data', useValue: data}],
       parent: this.injector
     });
   }
 
-  // HTML文字列を安全にサニタイズ
-  public getSafeHtml(htmlString: string): SafeHtml {
+  getSafeHtml(htmlString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
   }
 
-  setSortColumn(sortColumn: {[key:string]: boolean}) {
+  public setSortColumn(sortColumn: {[key:string]: boolean}) {
     this.sortColumn = sortColumn;
     // ソート処理
     if (this.sortEvent.observers.length > 0) {
