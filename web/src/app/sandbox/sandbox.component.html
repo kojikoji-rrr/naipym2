@@ -1,0 +1,17 @@
+<ng-template #sideMenuContent>
+  <div class="p-4">
+    <h3 class="font-bold text-md mb-2">サンドボックスページメニュー</h3>
+    <ul class="space-y-2">
+      <li><a href="#" class="text-sm text-blue-600 hover:underline">特になし</a></li>
+    </ul>
+  </div>
+</ng-template>
+
+<app-tab-layout
+  [tabs]="[
+    {routerLink: '/sandbox/p1', label: 'タブ1'},
+    {routerLink: '/sandbox/p2', label: 'タブ2'},
+    {routerLink: '/sandbox/p3', label: 'タブ3'},
+  ]">
+  <router-outlet></router-outlet>
+</app-tab-layout>

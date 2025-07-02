@@ -1,19 +1,39 @@
-<table class="w-full">
-  <!-- thLabelがあればそのvalueをthに表示。なければdataのkeyをthに表示。hideColumnの中にあるkeyは表示しない。-->
+<table class="min-w-full table-fixed bg-white border border-gray-300 shadow-sm rounded-lg">
   <thead>
-    <tr>
-      <!-- ソートマーク(△▽)を表示し押下でsortColumnにkey値追加、 -->
-      <th>Key1</th>
-      <th>Key2</th>
-      <th>Key3</th>
+    <tr class="bg-gray-50">
+      @for (key of getVisibleColumns(); track key) {
+        <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
+            [ngClass]="thLabels[key].colClass"
+            [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
+            (click)="onChangeSort(key)">
+          @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
+          <span class="align-middle text-xs">
+            @if (sortColumn[key] === true) {▲} @else if (sortColumn[key] === false) {▼}
+          </span>
+        </th>
+      }
     </tr>
   </thead>
-  <!-- thLabelがあればその列順でdata[i].valueをtdに表示。なければdataのvalueをtdに表示。hideColumnの中にあるvalueは表示しない。-->
-  <tbody>
-    <tr>
-      <td>値1</td>
-      <td>値2</td>
-      <td>値3</td>
-    </tr>
+  <tbody class="bg-transparent divide-y divide-gray-200">
+    @if (data.length===0) {
+      <tr><td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length"> --- No data --- </td></tr>
+    } @else {
+      @for (row of data; track row) {
+        <tr class="hover:bg-gray-50">
+          @for (key of getVisibleColumns(); track key) {
+            <td
+              [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
+              [ngClass]="thLabels[key] ? thLabels[key].rowClass : ''"
+              [ngStyle]="thLabels[key] ? thLabels[key].rowStyle : null">
+              @if (thLabels.hasOwnProperty(key) && thLabels[key].rowComponent) {
+                <ng-container *ngComponentOutlet="thLabels[key].rowComponent; injector:createInjector(key,row);"></ng-container>
+              } @else if (row[key]) {
+                <span class="items-center" [innerHTML]="getSafeHtml(row[key])"></span>
+              }
+            </td>
+          }
+        </tr>
+      }
+    }
   </tbody>
 </table>

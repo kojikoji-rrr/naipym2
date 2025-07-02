@@ -4,8 +4,7 @@ import { SideMenuService } from '../common/services/side-menu.service';
 @Component({
   selector: 'app-tags',
   imports: [],
-  templateUrl: './tags.component.html',
-  styleUrl: './tags.component.css'
+  templateUrl: './tags.component.html'
 })
 export class TagsComponent implements AfterViewInit, OnDestroy {
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;

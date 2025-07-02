@@ -2,3 +2,5 @@ web/.angular
 web/node_modules
 web/package-lock.json
 */__pycache__/*
+.resources/
+*__pycache__*

@@ -1,15 +1,36 @@
-<p>artists works!</p>
-
-<ng-template #sideMenuContent>
-  <div class="p-4">
-    <h3 class="font-bold text-md mb-2">絵師ページメニュー</h3>
-    <ul class="space-y-2">
-      <li><a href="#" class="text-sm text-blue-600 hover:underline">新規登録</a></li>
-      <li><a href="#" class="text-sm text-blue-600 hover:underline">検索フィルター</a></li>
-    </ul>
+<div class="h-full w-full">
+  <!-- サイドメニュー -->
+  <ng-template #sideMenuContent>
+    <div class="p-4">
+      <h3 class="font-bold text-md mb-2">絵師ページメニュー</h3>
+      <ul class="space-y-2">
+        <li><a href="#" class="text-sm text-blue-600 hover:underline">新規登録</a></li>
+        <li><a href="#" class="text-sm text-blue-600 hover:underline">検索フィルター</a></li>
+      </ul>
+    </div>
+  </ng-template>
+  <!-- ページヘッダー -->
+  <app-page-header [title]="'絵師検索'">
+    <button class="px-2 py-1 ml-4 text-xs rounded border border-gray-300 bg-white hover:bg-blue-100 active:bg-blue-200 transition-colors duration-150" (click)="artistTable.setSortColumn({});">
+      ソート解除
+    </button>
+  </app-page-header>
+  <!-- メインコンテンツ -->
+  <div class="pb-16">
+    <app-content-spinner [showSpinner]="status==='load'" [showContentAlways]="false">
+      <!-- 絵師情報結果表示 -->
+      <span>総件数：{{ total }}件</span>
+      <div class="overflow-x-auto">
+        <app-flexible-table
+          [data]="data"
+          [thLabels]="thLabels"
+          [hideColumns]="hideColumns"
+          (sortEvent)="onChangeSort($event)"
+          #artistTable>
+        </app-flexible-table>
+      </div>
+      <!-- 追加ロード時のスピナー表示 -->
+      <app-content-spinner [showSpinner]="status==='add'" [size]="'24px'" [padding]="'8px'"></app-content-spinner>
+    </app-content-spinner>
   </div>
-</ng-template>
-
-<div class="w-full">
-  <app-flexible-table></app-flexible-table>
 </div>

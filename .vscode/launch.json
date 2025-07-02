@@ -7,7 +7,7 @@
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "cwd": "${workspaceFolder}/src/api",
+      "cwd": "${workspaceFolder}/api",
       "args": [
         "main:app",
         "--reload",

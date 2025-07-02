@@ -18,13 +18,40 @@
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/favicon.ico"],
             "styles": ["src/styles.css"],
-            "scripts": []
-          }
+            "scripts": [],
+            "sourceMap": {
+              "scripts": true,
+              "styles": true,
+              "vendor": true
+            },
+            "namedChunks": true,
+            "vendorChunk": true
+          },
+          "configurations": {
+            "production": {
+              "sourceMap": false
+            },
+            "development": {
+              "sourceMap": true,
+              "optimization": false,
+              "extractLicenses": false,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "naipym-web:build:production"
+            },
+            "development": {
+              "buildTarget": "naipym-web:build:development"
+            }
+          },
+          "defaultConfiguration": "development",
           "options": {
-            "buildTarget": "naipym-web:build",
             "host": "0.0.0.0",
             "port": 8000
           }

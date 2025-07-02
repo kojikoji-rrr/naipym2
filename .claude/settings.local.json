@@ -5,7 +5,17 @@
       "Bash(mv:*)",
       "Bash(cp:*)",
       "Bash(rm:*)",
-      "Bash(sudo mv:*)"
+      "Bash(sudo mv:*)",
+      "Bash(touch:*)",
+      "Bash(python test_unicode_decode.py:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)",
+      "Bash(curl:*)",
+      "Bash(killall:*)",
+      "Bash(ls:*)",
+      "Bash(PYTHONPATH=/mnt/d/Naipym2/api python -c \"from main import IMAGES_DIR; print(IMAGES_DIR)\")"
     ],
     "deny": []
   }

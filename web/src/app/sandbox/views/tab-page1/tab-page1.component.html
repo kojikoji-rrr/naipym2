@@ -1,0 +1,40 @@
+<div>
+  <h2 class="text-xl font-bold mb-4">タブページ1</h2>
+  <p>これはタブページ1のコンテンツです。</p>
+  <div class="mt-4">
+    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" (click)="isOpen=true">
+      サンプルボタン
+    </button>
+  </div>
+  <p class="mt-4">サンプルFlexibleTable</p>
+  <div class="w-full">
+    <app-flexible-table
+      [data]="[
+        {'artist':'Artist1', 'works': 10, 'age': 20},
+        {'artist':'Artist2', 'works': 90, 'age': 50},
+        {'artist':'Artist3', 'works': 50, 'age': 80},
+      ]"
+      [thLabels]="{
+        'artist': {label: '絵師名', rowClass: 'flex justify-center', width: '50%'},
+        'works': {label: '作品数'},
+        'age': {label: '年齢'}
+      }"
+      [hideColumns]="[]"
+    ></app-flexible-table>
+  </div>
+</div>
+<!--サンプルモーダル-->
+<app-flexible-modal
+  [title]="'モーダルサンプル'"
+  [showBackdrop]="true"
+  [showCloseButton]="true"
+  [isOpen]="isOpen"
+  [buttons]="[
+    {label:'OK',    isPrimary:true,  event: okEvent},
+    {label:'閉じる', isPrimary:false, event: closeEvent}
+  ]"
+  (closeEvent)="onClose()">
+  <p>コンテンツコンテンツコンテンツ</p>
+  <p>コンテンツコンテンツコンテンツ</p> 
+  <p>コンテンツコンテンツコンテンツ</p> 
+</app-flexible-modal>

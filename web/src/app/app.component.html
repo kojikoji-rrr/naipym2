@@ -1,4 +1,5 @@
 <div class="h-screen flex flex-col">
+  <!-- サイトヘッダー -->
   <app-site-header
     class="flex-shrink-0"
     siteTitle="NaipyM"
@@ -10,11 +11,12 @@
       {routerLink: '/tools',         label: 'ツール'},
       {routerLink: '/sandbox',       label: 'Sandbox'}
     ]">
+    <!-- サイドメニューコンテンツ -->
     <ng-container *ngTemplateOutlet="sideMenuContent()"></ng-container>
   </app-site-header>
-  
-  <div class="flex-1 overflow-y-auto">
-    <div class="p-2 sm:p-6">
+  <!-- 残りの余白全体にメインコンテンツ -->
+  <div class="flex-1 overflow-y-auto overflow-x-hidden" #scrollContainer>
+    <div class="p-2 sm:p-6 h-full w-full">
       <router-outlet></router-outlet>
     </div>
   </div>

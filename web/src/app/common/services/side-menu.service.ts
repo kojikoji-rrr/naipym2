@@ -1,5 +1,4 @@
 import { Injectable, signal, TemplateRef, WritableSignal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
