@@ -36,12 +36,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     'is_banned'      :{label:'BAN',     colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'is_deleted'     :{label:'DEL',     colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'url'            :{label:'postURL', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellLinkComponent },
-    'img_path'       :{label:'元画像',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'onClickImage'}},
+    'img_path'       :{label:'元画像',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'showImageModal'}},
     'img_name'       :{label:'画像名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'dled_at'        :{label:'ＤＬ日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_dled_at'   :{label:'最終ＤＬ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'gen_model'      :{label:'生成ﾓﾃﾞﾙ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'gen_path'       :{label:'生成画像', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'onClickImage'}},
+    'gen_path'       :{label:'生成画像', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'showImageModal'}},
     'gen_name'       :{label:'生成名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'gened_at'       :{label:'生成日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_gened_at'  :{label:'最終生成', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined }
@@ -194,7 +194,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // 画像クリックハンドラー（普通のメソッドとして定義）
-  onClickImage(data: InjectedData, component: any) {
+  showImageModal(data: InjectedData, component: any) {
     this.isOpenImageModal = true;
   }
 }
