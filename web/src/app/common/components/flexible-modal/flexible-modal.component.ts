@@ -19,8 +19,8 @@ export interface FlexibleModalButton {
 export class FlexibleModalComponent {
   @Output() okEvent = new EventEmitter<void>();
   @Output() closeEvent = new EventEmitter<void>();
-  @Input() title: string = 'Modal-Title';
-  @Input() buttons: Array<FlexibleModalButton> = [{label:'OK', isPrimary:true, event: this.okEvent}, {label:'Close', isPrimary:false, event: this.closeEvent}];
+  @Input() title: string = '';
+  @Input() buttons: Array<FlexibleModalButton> = [];
   @Input() showBackdrop: boolean = true;
   @Input() showCloseButton: boolean = true;
   @Input() isOpen: boolean = false;

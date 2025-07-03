@@ -14,6 +14,8 @@ export interface FlexibleTableColumn {
   rowStyle?: {[key:string]: string};
   // データ表示コンポーネント
   rowComponent?: any;
+  // コンポーネントハンドラー（親コンポーネントのメソッド名を文字列で指定）
+  handler?: { [key: string]: string }
   // 列幅
   width?: string;
 }
@@ -24,6 +26,7 @@ export interface InjectedData {
   row: { [key: string]: any };
   register: (instance: any) => void;
   unregister: () => void;
+  parentComponent: any; // 親コンポーネントへの参照を追加
 }
 
 @Component({
@@ -40,6 +43,8 @@ export class FlexibleTableComponent {
   @Input() hideColumns: Array<string> = [];
   // キー項目
   @Input() trackByKeys: Array<string> = [];
+  // 親コンポーネント参照
+  @Input() parentComponent?: any;
   // ソートイベント（未設定の場合デフォルト処理）
   @Output() sortEvent = new EventEmitter<{sortColumn: {[key:string]: boolean}, data: Array<{[key:string]: any}>}>();
   // ソート処理
@@ -117,6 +122,7 @@ export class FlexibleTableComponent {
     const data: InjectedData = {
       key: key,
       row: row,
+      parentComponent: this.parentComponent,
       register: (instance: any) => {
         if (!this.rowComponents.has(trackByValue)) {
           this.rowComponents.set(trackByValue, new Map());
@@ -128,10 +134,14 @@ export class FlexibleTableComponent {
       },
     };
     return Injector.create({
-      providers: [{provide:'data', useValue: data}],
+      providers: [
+        {provide:'data', useValue: data},
+        {provide:'handler', useValue: this.thLabels[key].handler || {}}
+      ],
       parent: this.injector
     });
   }
+
 
   getSafeHtml(htmlString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);

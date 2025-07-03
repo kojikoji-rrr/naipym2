@@ -11,6 +11,9 @@ import io
 import mimetypes
 import os
     
+# WebP用のMIMEタイプを手動で追加
+mimetypes.add_type('image/webp', '.webp')
+
 def get_artists_data_and_total(req:SearchRequest):
     con = DB_SERVICE.open_session()
     query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_detail_query.sql")
@@ -53,7 +56,8 @@ def get_image_type(path: str) -> str:
     if not os.path.exists(path):
         raise FileNotFoundError(f"ファイルが見つかりません: {path}")
     
-    mime_type, _ = mimetypes.guess_type(path)
+    # mimetypesで判定（strict=Falseで非標準タイプも認識）
+    mime_type, _ = mimetypes.guess_type(path, strict=False)
     return mime_type or 'application/octet-stream'
 
 def get_image_content(path: str, is_thumbnail: bool) -> bytes:

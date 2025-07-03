@@ -26,6 +26,7 @@
           [thLabels]="thLabels"
           [hideColumns]="hideColumns"
           [trackByKeys]="trackByKeys"
+          [parentComponent]="this"
           (sortEvent)="onChangeSort($event)"
           #artistTable>
         </app-flexible-table>
@@ -35,3 +36,13 @@
     </app-content-spinner>
   </div>
 </div>
+
+<app-flexible-modal
+  [showBackdrop]="true"
+  [showCloseButton]="true"
+  [isOpen]="isOpenImageModal"
+  (closeEvent)="isOpenImageModal=false">
+  <p>コンテンツコンテンツコンテンツ</p>
+  <p>コンテンツコンテンツコンテンツ</p> 
+  <p>コンテンツコンテンツコンテンツ</p> 
+</app-flexible-modal>

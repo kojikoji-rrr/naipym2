@@ -1,26 +1,28 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, HostListener, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, HostListener, ElementRef, EventEmitter } from '@angular/core';
 import { SideMenuService } from '../common/services/side-menu.service';
 import { PageHeaderComponent } from '../common/components/page-header/page-header.component';
-import { FlexibleTableColumn, FlexibleTableComponent } from '../common/components/flexible-table/flexible-table.component';
+import { FlexibleTableColumn, FlexibleTableComponent, InjectedData } from '../common/components/flexible-table/flexible-table.component';
 import { ContentSpinnerComponent } from '../common/components/content-spinner/content-spinner.component';
 import { ApiService } from '../common/services/api.service';
 import { ScrollContainerService } from '../common/services/scroll-container.service';
 import { TableCellLinkComponent } from './components/table-cell-link/table-cell-link.component';
 import { TableCellCopyComponent } from './components/table-cell-copy/table-cell-copy.component';
 import { TableCellThumbComponent } from './components/table-cell-thumb/table-cell-thumb.component';
+import { FlexibleModalComponent } from '../common/components/flexible-modal/flexible-modal.component';
 
 const LOAD_LIMIT = 50;
 const SHRESHOLD = 200; // 下端からの距離（px）
 
 @Component({
   selector: 'app-artists',
-  imports: [PageHeaderComponent, FlexibleTableComponent, ContentSpinnerComponent],
+  imports: [PageHeaderComponent, FlexibleTableComponent, ContentSpinnerComponent, FlexibleModalComponent],
   templateUrl: './artists.component.html'
 })
 export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
   @ViewChild('artistTable') artistTable!: FlexibleTableComponent;
+  
   // 表示データ
   data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -34,12 +36,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     'is_banned'      :{label:'BAN',     colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'is_deleted'     :{label:'DEL',     colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'url'            :{label:'postURL', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellLinkComponent },
-    'img_path'       :{label:'元画像',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent },
+    'img_path'       :{label:'元画像',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'onClickImage'}},
     'img_name'       :{label:'画像名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'dled_at'        :{label:'ＤＬ日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_dled_at'   :{label:'最終ＤＬ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'gen_model'      :{label:'生成ﾓﾃﾞﾙ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'gen_path'       :{label:'生成画像', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent },
+    'gen_path'       :{label:'生成画像', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:TableCellThumbComponent, handler:{onClickImage: 'onClickImage'}},
     'gen_name'       :{label:'生成名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'gened_at'       :{label:'生成日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_gened_at'  :{label:'最終生成', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined }
@@ -58,6 +60,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage: number = 0;
   // 現在のソート情報
   sortColumn: {[key:string]: boolean} = {};
+  // モーダル展開制御
+  isOpenImageModal: boolean = false;
  
   constructor(
     private sideMenuService: SideMenuService,
@@ -187,5 +191,10 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.search(true);
       }
     }
+  }
+
+  // 画像クリックハンドラー（普通のメソッドとして定義）
+  onClickImage(data: InjectedData, component: any) {
+    this.isOpenImageModal = true;
   }
 }

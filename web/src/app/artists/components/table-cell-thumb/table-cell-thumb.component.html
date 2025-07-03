@@ -1,5 +1,3 @@
 <div class="flex items-center justify-center w-16 h-16">
-    <app-content-spinner [showSpinner]="isLoading" [size]="'16px'" [padding]="'0px'">
-        <img [src]="getThumbnailUrl()" (load)="isLoading = false" class="max-w-full max-h-full object-contain rounded cursor-pointer hover:opacity-80"/>
-    </app-content-spinner>
+    <img [src]="getThumbnailUrl()" (click)="onClick()" class="max-w-full max-h-full object-contain rounded cursor-pointer hover:opacity-80"/>
 </div>
