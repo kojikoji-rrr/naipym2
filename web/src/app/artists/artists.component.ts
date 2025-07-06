@@ -35,8 +35,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
   thLabels: {[key:string]: FlexibleTableColumn} = {
-    'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
-    'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
+    // 'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
+    // 'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
     'domain'         :{label:'ドメイン', colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"120px"}, rowComponent:undefined, mobile: { minWidth: '40px' }},
     'tag'            :{label:'タグ',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:TableCellCopyComponent, mobile: { minWidth: '120px', flex: '1' }},
     'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:undefined},
@@ -56,8 +56,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     'gened_at'       :{label:'生成日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
     'last_gened_at'  :{label:'最終生成', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined }
   }
-  // trackByキー
-  trackByKeys: Array<string> = ['tag', 'artist_id'];
   // 非表示カラム
   hideColumns: Array<string> = ["artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
   // 総件数
@@ -71,7 +69,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   // モーダル展開制御
   isOpenImageModal: boolean = false;
   // サンプルモード
-  isSample: boolean = true;
+  isSample: boolean = false;
   // モーダル画像情報
   modalImageA?:ImageModalData;
   modalImageB?:ImageModalData;
