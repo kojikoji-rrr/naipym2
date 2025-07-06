@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 
 // 列定義
@@ -37,6 +37,8 @@ export interface FlexibleTableColumn {
 export interface InjectedData {
   key: string;
   row: { [key: string]: any };
+  register: (instance: any) => void;
+  unregister: () => void;
   parentComponent: any; // 親コンポーネントへの参照を追加
 }
 
@@ -45,7 +47,7 @@ export interface InjectedData {
   imports: [CommonModule],
   templateUrl: 'flexible-table.component.html',
 })
-export class FlexibleTableComponent implements OnChanges {
+export class FlexibleTableComponent {
   // 表示データ
   @Input() data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -66,36 +68,10 @@ export class FlexibleTableComponent implements OnChanges {
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
 
-  visibleColumns: string[] = [];
-  imageColumns: string[] = [];
-
   constructor(
     public injector: Injector,
     private sanitizer: DomSanitizer
   ) {}
-
-  // 4. ngOnChanges ライフサイクルフックを追加
-  ngOnChanges(changes: SimpleChanges): void {
-    // 入力データが変わった時だけ、列リストを再計算する
-    if (changes['data'] || changes['thLabels'] || changes['hideColumns']) {
-      this.recalculateColumns();
-    }
-  }
-
-  private recalculateColumns(): void {
-    if (this.data.length === 0) {
-      this.visibleColumns = [];
-    } else if (Object.keys(this.thLabels).length > 0) {
-      this.visibleColumns = Object.keys(this.thLabels).filter(key => !this.hideColumns.includes(key));
-    } else {
-      const allKeys = Object.keys(this.data[0]);
-      this.visibleColumns = allKeys.filter(key => !this.hideColumns.includes(key));
-    }
-    // imageColumns もここで一緒に計算しておく
-    this.imageColumns = this.visibleColumns.filter(key => 
-      this.thLabels[key]?.mobile?.isImage === true
-    );
-  }
 
   onChangeSort(key: string) {
     // ソートキー追加（新しいオブジェクトを作成）
@@ -111,7 +87,7 @@ export class FlexibleTableComponent implements OnChanges {
   }
 
   setSort(sortedColumns:{[key:string]: boolean}, callEmit:boolean=false) {
-    this.currentSort = {...sortedColumns};
+    this.currentSort = sortedColumns;
     if (callEmit) this.sort();
   }
 
@@ -124,7 +100,7 @@ export class FlexibleTableComponent implements OnChanges {
     if (this.sortEvent.observers.length > 0) {
       // イベント設定済ならイベント発火
       // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
-      this.sortEvent.emit({data: this.data, sort: {...this.currentSort}});
+      this.sortEvent.emit({data: this.data, sort: this.currentSort});
     } else {
       // イベント未設定ならデフォルトのソート処理を実行
       // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
@@ -140,16 +116,47 @@ export class FlexibleTableComponent implements OnChanges {
       });
     }
   }
+  
+  trackByFn(index: number, row: { [key: string]: any }): any {
+    if (this.trackByKeys && this.trackByKeys.length > 0) {
+      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
+      return keyValue ?? index;
+    }
+    return index;
+  }
+
+  getVisibleColumns(): string[] {
+    if (this.data.length === 0) return [];
+    
+    // thLabelsが空でない場合は、thLabelsのキーの順序で表示
+    if (Object.keys(this.thLabels).length > 0) {
+      return Object.keys(this.thLabels).filter(key => !this.hideColumns.includes(key));
+    }
+    
+    // thLabelsが空の場合は従来通り（データのキー全てから hideColumns を除外）
+    const allKeys = Object.keys(this.data[0]);
+    return allKeys.filter(key => !this.hideColumns.includes(key));
+  }
 
   getRowComponent(rowTrackByKeys: Array<any>, column: string): any | undefined {
     return this.rowComponents.get(rowTrackByKeys.join('_'))?.get(column);
   }
 
   createInjector(key:string, row:{[key:string]:any}): Injector {
+    const trackByValue = this.trackByFn(0, row);
     const data: InjectedData = {
       key: key,
       row: row,
-      parentComponent: this.parentComponent
+      parentComponent: this.parentComponent,
+      register: (instance: any) => {
+        if (!this.rowComponents.has(trackByValue)) {
+          this.rowComponents.set(trackByValue, new Map());
+        }
+        this.rowComponents.get(trackByValue)!.set(key, instance);
+      },
+      unregister: () => {
+        this.rowComponents.get(trackByValue)?.delete(key);
+      },
     };
     return Injector.create({
       providers: [
@@ -184,6 +191,12 @@ export class FlexibleTableComponent implements OnChanges {
     }
     
     return style;
+  }
+
+  getImageColumns(): string[] {
+    return this.getVisibleColumns().filter(key => 
+      this.thLabels[key]?.mobile?.isImage === true
+    );
   }
 
   getImageEmptyText(key: string): string {

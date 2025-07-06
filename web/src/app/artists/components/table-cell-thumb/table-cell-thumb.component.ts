@@ -9,7 +9,7 @@ import { ApiService } from '../../../common/services/api.service';
   imports: [CommonModule],
   templateUrl: "table-cell-thumb.component.html"
 })
-export class TableCellThumbComponent {
+export class TableCellThumbComponent implements OnInit, OnDestroy {
   public static readonly onClickImage = 'onClickImage';
   public value?:any;
   public handler: {[key:string]: (data: InjectedData, component?: any) => void} = {};
@@ -20,6 +20,19 @@ export class TableCellThumbComponent {
   ) {
     this.value = data.row[data.key];
     this.handler = injectedHandler;
+  }
+
+
+  ngOnInit(): void {
+    if (this.data.register) {
+      this.data.register(this);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.data.unregister) {
+      this.data.unregister();
+    }
   }
 
   onClick() {

@@ -22,6 +22,18 @@ export class TableCellTextareaComponent {
     this.handler = injectedHandler;
   }
 
+  ngOnInit(): void {
+    if (this.data.register) {
+      this.data.register(this);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.data.unregister) {
+      this.data.unregister();
+    }
+  }
+
   onChange() {
     const handlerFn = this.handler[TableCellTextareaComponent.onChangeInput];
     if (typeof handlerFn === 'function') {

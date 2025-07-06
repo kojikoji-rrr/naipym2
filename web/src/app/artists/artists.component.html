@@ -17,7 +17,7 @@
   </app-page-header>
   <!-- メインコンテンツ -->
   <div class="pb-16">
-    <app-content-spinner [showSpinner]="status==='load'">
+    <app-content-spinner [showSpinner]="status==='load'" [showContentAlways]="false">
       <!-- 絵師情報結果表示 -->
       <span>総件数：{{ total }}件</span>
       <div class="overflow-x-auto">
