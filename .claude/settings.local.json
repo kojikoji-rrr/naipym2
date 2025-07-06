@@ -15,7 +15,8 @@
       "Bash(curl:*)",
       "Bash(killall:*)",
       "Bash(ls:*)",
-      "Bash(PYTHONPATH=/mnt/d/Naipym2/api python -c \"from main import IMAGES_DIR; print(IMAGES_DIR)\")"
+      "Bash(PYTHONPATH=/mnt/d/Naipym2/api python -c \"from main import IMAGES_DIR; print(IMAGES_DIR)\")",
+      "Bash(find:*)"
     ],
     "deny": []
   }

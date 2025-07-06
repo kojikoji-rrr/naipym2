@@ -12,7 +12,7 @@ export class ApiService {
     public urlResource = {
         ARTIST_DATA_AND_TOTAL: `${this.API_BASE}/artist/data_and_total`,
         ARTIST_DATA: `${this.API_BASE}/artist/data`,
-        ARTIST_IMAGE: `${this.API_BASE}/artist/image`
+        ARTIST_TYPE: `${this.API_BASE}/artist/mime`
     }
 
     constructor(private http: HttpClient) {}
@@ -33,10 +33,8 @@ export class ApiService {
         return this.http.get(url.toString(), { responseType: 'json' })
     }
 
-    public getArtistImage(path:string, is_sample:boolean): Observable<any> {
-        var url = new URL(this.urlResource.ARTIST_IMAGE, this.API_URL);
-        url.searchParams.append('path', path);
-        url.searchParams.append('is_sample', is_sample.toString());
-        return this.http.get(url.toString(), { responseType: 'json' })
+    public getImageType(path:string): Observable<any> {
+        var url = new URL(`${this.urlResource.ARTIST_TYPE}/${path}`, this.API_URL);
+        return this.http.get(url.toString(), { responseType: 'text' })
     }
 }

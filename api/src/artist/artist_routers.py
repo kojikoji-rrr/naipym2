@@ -33,6 +33,20 @@ def search_artists_diff(limit: int = 50, offset: int = 0, sort: str = QueryParam
     
     return JSONResponse(content=res)
 
+@router.get(f"{BASE_URI}/mime/{{path:path}}")
+def get_content_type(path: str):
+    image_path = str(RESOURCES_DIR / path)
+    if path == 'sample':
+        image_path = str(IMAGES_DIR / "sample.png")
+    
+    try:
+        result = get_image_type(image_path)
+    except Exception as e:
+        result = None
+    
+    # 画像タイプを返却
+    return result or 'none'
+    
 @router.get(f"{BASE_URI}/thumbs/{{path:path}}")
 def get_thumbnails(path: str):
     image_path = str(RESOURCES_DIR / path)
@@ -52,10 +66,10 @@ def get_thumbnails(path: str):
     else:
         return Response(status_code=404)
 
-@router.get(f"{BASE_URI}/image")
-def get_image(path:str, is_sample:bool=False):
+@router.get(f"{BASE_URI}/{{path:path}}")
+def get_content(path: str):
     image_path = str(RESOURCES_DIR / path)
-    if is_sample:
+    if path == 'sample':
         image_path = str(IMAGES_DIR / "sample.png")
     
     # 画像タイプを取得
@@ -63,10 +77,10 @@ def get_image(path:str, is_sample:bool=False):
     
     # コンテンツを取得
     if mime.startswith("image/"):
-        content = get_image_data(image_path, False)
+        content = get_image_content(image_path, False)
+        return Response(content=content, media_type=mime)
     elif mime.startswith("video/"):
-        content = get_video_data(image_path, False)
+        content = get_video_content(image_path, False)
+        return Response(content=content, media_type=mime)
     else:
-        content = None
-    
-    return {'mime': mime, 'content': content}
+        return Response(status_code=404)

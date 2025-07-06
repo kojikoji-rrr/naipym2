@@ -21,7 +21,7 @@ export class TableCellCopyComponent {
     event.preventDefault();
     event.stopPropagation();
     
-    var formattedText = String(this.data.key).replace(/_/g, ' ')
+    var formattedText = String(this.value).replace(/_/g, ' ')
     const textToCopy = `artist:${formattedText}`;
     navigator.clipboard.writeText(textToCopy);
   }

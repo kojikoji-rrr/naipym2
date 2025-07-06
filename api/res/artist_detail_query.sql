@@ -2,6 +2,7 @@ SELECT
     *
 FROM (
     SELECT
+        list.id  as 'tag_id',
         list.tag as 'tag',
         group_concat(DISTINCT domain) as domain,
         list.artist_id as 'artist_id',
@@ -27,9 +28,12 @@ FROM (
             ',')||
         ']' as generate_image,
         max(img.download_at) as 'last_dled_at',
-        max(gen.created_at)  as 'last_gened_at'
+        max(gen.created_at)  as 'last_gened_at',
+        list.favorite,
+        list.memo
     FROM (
             SELECT
+                t.id,
                 t.tag, 
                 t.domain,
                 CASE WHEN a.artist_id IS NOT NULL THEN a.artist_id   ELSE rep.artist_id   END as 'artist_id',
@@ -37,10 +41,13 @@ FROM (
                 CASE WHEN a.artist_id IS NOT NULL THEN a.other_names ELSE rep.other_names END as 'other_names',
                 CASE WHEN a.artist_id IS NOT NULL THEN a.post_count  ELSE rep.post_count  END as 'post_count',
                 CASE WHEN a.artist_id IS NOT NULL THEN a.is_banned   ELSE rep.is_banned   END as 'is_banned',
-                CASE WHEN a.artist_id IS NOT NULL THEN a.is_deleted  ELSE rep.is_deleted  END as 'is_deleted'
+                CASE WHEN a.artist_id IS NOT NULL THEN a.is_deleted  ELSE rep.is_deleted  END as 'is_deleted',
+				f.favorite,
+				f.memo
             FROM
                 tag_data t
                 LEFT OUTER JOIN artist_data a ON t.tag = a.artist_name
+				LEFT OUTER JOIN favorite f ON t.id = f.tag_id
                 LEFT OUTER JOIN (
                     SELECT t1.id as 'rid', ra.*
                     FROM   tag_data t1, tag_data t2, tags_relation tr LEFT OUTER JOIN artist_data ra ON t2.tag = ra.artist_name

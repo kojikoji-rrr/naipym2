@@ -11,7 +11,7 @@
   </ng-template>
   <!-- ページヘッダー -->
   <app-page-header [title]="'絵師検索'">
-    <button class="px-2 py-1 ml-4 text-xs rounded border border-gray-300 bg-white hover:bg-blue-100 active:bg-blue-200 transition-colors duration-150" (click)="artistTable.setSortColumn({});">
+    <button class="px-2 py-1 ml-4 text-xs rounded border border-gray-300 bg-white hover:bg-blue-100 active:bg-blue-200 transition-colors duration-150" (click)="artistTable.clearSort();">
       ソート解除
     </button>
   </app-page-header>
@@ -25,7 +25,9 @@
           [data]="data"
           [thLabels]="thLabels"
           [hideColumns]="hideColumns"
+          [sortedColumns]="currentSort"
           [trackByKeys]="trackByKeys"
+          [rowHeight]="'280px'"
           [parentComponent]="this"
           (sortEvent)="onChangeSort($event)"
           #artistTable>
@@ -36,13 +38,27 @@
     </app-content-spinner>
   </div>
 </div>
-
+<!-- ImageModal -->
 <app-flexible-modal
   [showBackdrop]="true"
   [showCloseButton]="true"
   [isOpen]="isOpenImageModal"
-  (closeEvent)="isOpenImageModal=false">
-  <p>コンテンツコンテンツコンテンツ</p>
-  <p>コンテンツコンテンツコンテンツ</p> 
-  <p>コンテンツコンテンツコンテンツ</p> 
+  [size]="'full'"
+  (closeEvent)="closeImageModal()">
+  <div class="flex flex-col md:flex-row gap-4 p-4 h-full overflow-hidden">
+    <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
+      @if (modalImageA && modalImageA.mimeType.includes("image/")) {
+        <img [src]="modalImageA.url" class="w-full h-full object-contain rounded shadow" />
+      } @else if (modalImageA && modalImageA.mimeType.includes("video/")) {
+        <video [src]="modalImageA.url" controls class="w-full h-full object-contain rounded shadow"></video>
+      }
+    </div>
+    <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
+      @if (modalImageB && modalImageB.mimeType.includes("image/")) {
+        <img [src]="modalImageB.url" class="w-full h-full object-contain rounded shadow" />
+      } @else if (modalImageB && modalImageB.mimeType.includes("video/")) {
+        <video [src]="modalImageB.url" controls class="w-full h-full object-contain rounded shadow"></video>
+      }
+    </div>
+  </div>
 </app-flexible-modal>

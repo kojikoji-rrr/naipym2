@@ -1,41 +1,113 @@
-<table class="min-w-full table-fixed bg-white border border-gray-300 shadow-sm rounded-lg">
-  <thead>
-    <tr class="bg-gray-50">
-      @for (key of getVisibleColumns(); track key) {
-        <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
-            [ngClass]="thLabels[key].colClass"
-            [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
-            (click)="onChangeSort(key)">
-          @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
-          <span class="align-middle text-xs">
-            @if (sortColumn[key] === true) {▲} @else if (sortColumn[key] === false) {▼}
-          </span>
-        </th>
-      }
-    </tr>
-  </thead>
-  <tbody class="bg-transparent divide-y divide-gray-200">
-    @if (data.length===0) {
-      <tr><td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length"> --- No data --- </td></tr>
-    } @else {
-      @for (row of data; track trackByFn($index, row)) {
-        <tr class="hover:bg-gray-50">
-          @for (key of getVisibleColumns(); track key) {
-            <td
+<!-- デスクトップ版テーブル (md以上) -->
+<div class="hidden md:block">
+  <table class="min-w-full table-fixed bg-white border border-gray-300 shadow-sm rounded-lg">
+    <thead>
+      <tr class="bg-gray-50">
+        @for (key of getVisibleColumns(); track key) {
+          <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
+              [ngClass]="thLabels[key].colClass"
               [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
-              [ngClass]="thLabels[key] ? thLabels[key].rowClass : ''"
-              [ngStyle]="thLabels[key] ? thLabels[key].rowStyle : null">
-              @if (row[key]) {
-                @if (thLabels.hasOwnProperty(key) && thLabels[key].rowComponent) {
-                  <ng-container *ngComponentOutlet="thLabels[key].rowComponent; injector:createInjector(key,row);"></ng-container>
-                } @else {
-                  <span class="items-center" [innerHTML]="getSafeHtml(row[key])"></span>
+              (click)="onChangeSort(key)">
+            @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
+            <span class="align-middle text-xs">
+              @if (currentSort[key] === true) {▲} @else if (currentSort[key] === false) {▼}
+            </span>
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody class="bg-transparent divide-y divide-gray-200">
+      @if (data.length===0) {
+        <tr><td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length"> --- No data --- </td></tr>
+      } @else {
+        @for (row of data; track trackByFn($index, row)) {
+          <tr class="hover:bg-gray-50" [style.height]="rowHeight || 'auto'">
+            @for (key of getVisibleColumns(); track key) {
+              <td
+                [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
+                [ngClass]="thLabels[key] ? thLabels[key].rowClass : ''"
+                [ngStyle]="thLabels[key] ? thLabels[key].rowStyle : null">
+                @if (row[key]) {
+                  @if (thLabels.hasOwnProperty(key) && thLabels[key].rowComponent) {
+                    <ng-container *ngComponentOutlet="thLabels[key].rowComponent; injector:createInjector(key,row);"></ng-container>
+                  } @else {
+                    <span class="items-center" [innerHTML]="getSafeHtml(row[key])"></span>
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- モバイル版テーブルレイアウト (md未満) -->
+<div class="block md:hidden">
+  @if (data.length===0) {
+    <div class="text-center text-gray-400 py-8"> --- No data --- </div>
+  } @else {
+    <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden">
+      @for (row of data; track trackByFn($index, row); let last = $last) {
+        <div class="border-b border-gray-300" [class.border-b-0]="last">
+          <!-- 上部: データ情報（横スクロール可能） -->
+          <div class="border-b border-gray-200 overflow-x-auto">
+            <div class="flex gap-2 p-2 text-xs" style="min-width: 600px;">
+              @for (key of getVisibleColumns(); track key) {
+                @if (key !== 'img_url' && key !== 'gen_url') {
+                  <div class="flex flex-col" 
+                       [class.items-center]="isSmallColumn(key)"
+                       [style]="getMobileColumnStyle(key)">
+                    <span class="text-gray-500 text-[10px] mb-1 cursor-pointer hover:text-gray-700" (click)="onChangeSort(key)">
+                      @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
+                      <span class="align-middle text-[8px] ml-1">
+                        @if (currentSort[key] === true) {▲} @else if (currentSort[key] === false) {▼}
+                      </span>
+                    </span>
+                    <div class="text-gray-900" 
+                         [class.text-center]="isSmallColumn(key)"
+                         [class.flex]="isSmallColumn(key)"
+                         [class.justify-center]="isSmallColumn(key)"
+                         [class.break-words]="!isSmallColumn(key)"
+                         [class.overflow-hidden]="key === 'domain'"
+                         [class.text-ellipsis]="key === 'domain'"
+                         [class.whitespace-nowrap]="key === 'domain'">
+                      @if (row[key]) {
+                        @if (thLabels.hasOwnProperty(key) && thLabels[key].rowComponent) {
+                          <ng-container *ngComponentOutlet="thLabels[key].rowComponent; injector:createInjector(key,row);"></ng-container>
+                        } @else {
+                          <span [innerHTML]="getSafeHtml(row[key])"></span>
+                        }
+                      }
+                    </div>
+                  </div>
                 }
               }
-            </td>
-          }
-        </tr>
+            </div>
+          </div>
+          
+          <!-- 下部: 画像表示エリア -->
+          <div class="flex h-48">
+            @for (imageKey of getImageColumns(); track imageKey; let isLast = $last) {
+              <div class="flex-1 flex items-center justify-center p-2" 
+                   [class.border-r]="!isLast"
+                   [class.border-gray-200]="!isLast"
+                   style="min-width: 0; min-height: 0;">
+                @if (row[imageKey]) {
+                  <div style="max-width: 100%; max-height: 100%; width: 100%; height: 100%;">
+                    @if (thLabels.hasOwnProperty(imageKey) && thLabels[imageKey].rowComponent) {
+                      <ng-container *ngComponentOutlet="thLabels[imageKey].rowComponent; injector:createInjector(imageKey,row);"></ng-container>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-gray-400 text-sm">{{getImageEmptyText(imageKey)}}</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
       }
-    }
-  </tbody>
-</table>
+    </div>
+  }
+</div>

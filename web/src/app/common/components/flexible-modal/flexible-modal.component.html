@@ -6,9 +6,10 @@
     <!-- モーダル本体 -->
     <div class="relative bg-white rounded-lg shadow-xl w-full border-[1.5px] border-gray-300 flex flex-col"
          [class]="getSizeClass()"
-         [ngStyle]="getCustomStyles()">
+         [ngStyle]="getCustomStyles()"
+         [style]="customStyles">
       <!-- 閉じるボタン -->
-      <button type="button" class="absolute top-2 right-2 text-gray-400 font-medium hover:text-gray-600 focus:outline-none mr-1 z-10" [hidden]="!showCloseButton" (click)="onClose()">✕</button>
+      <button type="button" class="absolute top-0 right-0 text-gray-400 font-medium hover:text-gray-600 focus:outline-none z-10 p-3 flex items-center justify-center" [hidden]="!showCloseButton" (click)="onClose()">✕</button>
       <!-- ヘッダー -->
       <h3 class="px-3 py-2 font-medium text-gray-900" [hidden]="!title">{{ title }}</h3>
       <!-- ボディ（可変領域） -->

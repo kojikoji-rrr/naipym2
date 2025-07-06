@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, ViewChildren } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector, ViewChildren, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
+import { isNumberObject } from 'util/types';
 
 // 列定義
 export interface FlexibleTableColumn {
@@ -15,9 +16,22 @@ export interface FlexibleTableColumn {
   // データ表示コンポーネント
   rowComponent?: any;
   // コンポーネントハンドラー（親コンポーネントのメソッド名を文字列で指定）
-  handler?: { [key: string]: string }
+  handler?: { [key: string]: (data: any, component?: any) => void };
   // 列幅
   width?: string;
+  // モバイル版設定
+  mobile?: {
+    // 小さい列として扱うか（中央揃え等）
+    isSmall?: boolean;
+    // モバイル版での最小幅
+    minWidth?: string;
+    // フレックス設定
+    flex?: string;
+    // 画像列として扱うか
+    isImage?: boolean;
+    // 画像なし時のテキスト
+    emptyText?: string;
+  };
 }
 
 // Injectorデータ定義
@@ -32,9 +46,10 @@ export interface InjectedData {
 @Component({
   selector: 'app-flexible-table',
   imports: [CommonModule],
-  templateUrl: 'flexible-table.component.html'
+  templateUrl: 'flexible-table.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FlexibleTableComponent {
+export class FlexibleTableComponent implements OnInit{
   // 表示データ
   @Input() data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -43,19 +58,79 @@ export class FlexibleTableComponent {
   @Input() hideColumns: Array<string> = [];
   // キー項目
   @Input() trackByKeys: Array<string> = [];
+  // ソート初期値
+  @Input() sortedColumns: {[key:string]: boolean} = {}
   // 親コンポーネント参照
   @Input() parentComponent?: any;
+  // 行の高さ（全体指定）
+  @Input() rowHeight?: string;
   // ソートイベント（未設定の場合デフォルト処理）
-  @Output() sortEvent = new EventEmitter<{sortColumn: {[key:string]: boolean}, data: Array<{[key:string]: any}>}>();
-  // ソート処理
-  sortColumn: {[key:string]: boolean} = {}
+  @Output() sortEvent = new EventEmitter<{data:Array<{[key:string]: any}>, sort:{[key:string]: boolean}}>();
+  
+  // ソート状態
+  currentSort: {[key:string]: boolean} = {};
   // 列コンポーネント
-  private rowComponents = new Map<any, Map<string, any>>();
+  rowComponents = new Map<any, Map<string, any>>();
 
   constructor(
     public injector: Injector,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
+
+  ngOnInit() {
+     this.currentSort = this.sortedColumns;
+  }
+
+  onChangeSort(key: string) {
+    // ソートキー追加（新しいオブジェクトを作成）
+    if (!this.currentSort.hasOwnProperty(key)) {
+      this.currentSort[key] = false;
+    } else if (!this.currentSort[key]) {
+      this.currentSort[key] = true;
+    } else {
+      delete this.currentSort[key];
+    }
+    // ソート処理
+    this.sort();
+    this.cdr.markForCheck();
+  }
+
+  clearSort() {
+    this.currentSort = {};
+    this.sort();
+    this.cdr.markForCheck(); 
+  }
+
+  sort() {
+    if (this.sortEvent.observers.length > 0) {
+      // イベント設定済ならイベント発火
+      // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
+      this.sortEvent.emit({data: this.data, sort: this.currentSort});
+    } else {
+      // イベント未設定ならデフォルトのソート処理を実行
+      // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
+      this.data.sort((a, b) => {
+        for (const key in this.currentSort) {
+          if (this.currentSort.hasOwnProperty(key)) {
+            const order = this.currentSort[key] ? 1 : -1;
+            if (a[key] < b[key]) return -1 * order;
+            if (a[key] > b[key]) return 1 * order;
+          }
+        }
+        return 0;
+      });
+      this.cdr.markForCheck();
+    }
+  }
+  
+  trackByFn(index: number, row: { [key: string]: any }): any {
+    if (this.trackByKeys && this.trackByKeys.length > 0) {
+      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
+      return keyValue ?? index;
+    }
+    return index;
+  }
 
   getVisibleColumns(): string[] {
     if (this.data.length === 0) return [];
@@ -68,49 +143,6 @@ export class FlexibleTableComponent {
     // thLabelsが空の場合は従来通り（データのキー全てから hideColumns を除外）
     const allKeys = Object.keys(this.data[0]);
     return allKeys.filter(key => !this.hideColumns.includes(key));
-  }
-
-  onChangeSort(key: string) {
-    // ソートキー追加
-    if (!this.sortColumn.hasOwnProperty(key)) {
-      this.sortColumn[key] = false;
-    } else if (!this.sortColumn[key]) {
-      this.sortColumn[key] = true;
-    } else {
-      delete this.sortColumn[key];
-    }
-
-    // ソート処理
-    if (this.sortEvent.observers.length > 0) {
-      // イベント設定済ならイベント発火
-      // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
-      this.sortEvent.emit({sortColumn: this.sortColumn, data: this.data});
-    } else {
-      // イベント未設定ならデフォルトのソート処理を実行
-      this.defaultSort();
-    }
-  }
-
-  defaultSort() {
-    // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
-    this.data.sort((a, b) => {
-      for (const key in this.sortColumn) {
-        if (this.sortColumn.hasOwnProperty(key)) {
-          const order = this.sortColumn[key] ? 1 : -1;
-          if (a[key] < b[key]) return -1 * order;
-          if (a[key] > b[key]) return 1 * order;
-        }
-      }
-      return 0;
-    });
-  }
-  
-  trackByFn(index: number, row: { [key: string]: any }): any {
-    if (this.trackByKeys && this.trackByKeys.length > 0) {
-      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
-      return keyValue ?? index;
-    }
-    return index;
   }
 
   getRowComponent(rowTrackByKeys: Array<any>, column: string): any | undefined {
@@ -142,21 +174,39 @@ export class FlexibleTableComponent {
     });
   }
 
-
   getSafeHtml(htmlString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
   }
 
-  public setSortColumn(sortColumn: {[key:string]: boolean}) {
-    this.sortColumn = sortColumn;
-    // ソート処理
-    if (this.sortEvent.observers.length > 0) {
-      // イベント設定済ならイベント発火
-      // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
-      this.sortEvent.emit({sortColumn: this.sortColumn, data: this.data});
-    } else {
-      // イベント未設定ならデフォルトのソート処理を実行
-      this.defaultSort();
+  // モバイル版用のメソッド
+  isSmallColumn(key: string): boolean {
+    return this.thLabels[key]?.mobile?.isSmall || false;
+  }
+
+  getMobileColumnStyle(key: string): { [key: string]: string } {
+    const mobile = this.thLabels[key]?.mobile;
+    if (!mobile) {
+      return { 'min-width': '100px' };
     }
+    
+    const style: { [key: string]: string } = {};
+    if (mobile.minWidth) {
+      style['min-width'] = mobile.minWidth;
+    }
+    if (mobile.flex) {
+      style['flex'] = mobile.flex;
+    }
+    
+    return style;
+  }
+
+  getImageColumns(): string[] {
+    return this.getVisibleColumns().filter(key => 
+      this.thLabels[key]?.mobile?.isImage === true
+    );
+  }
+
+  getImageEmptyText(key: string): string {
+    return this.thLabels[key]?.mobile?.emptyText || '画像なし';
   }
 }

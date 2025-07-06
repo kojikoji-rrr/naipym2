@@ -27,6 +27,7 @@ export class FlexibleModalComponent {
   @Input() size: 'sm' | 'md' | 'lg' | 'xl' | 'full' = 'md';
   @Input() customWidth: string = '';
   @Input() customHeight: string = '';
+  @Input() customStyles:{[key: string]: string} = {}
   @Input() bodyClass:string = '';
   @Input() bodyStyle:{[key: string]: string} = {}
 
