@@ -109,7 +109,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ソート処理（再検索）
   onChangeSort(event: {data: Array<{[key:string]: any}>, sort: {[key:string]:boolean}}) {
-    this.currentSort = event.sort;
+    this.currentSort = {...event.sort};
     this.search();
   }
 
@@ -199,7 +199,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return processedItem;
     });
-    
     this.data.push(...processedData);
   }
 

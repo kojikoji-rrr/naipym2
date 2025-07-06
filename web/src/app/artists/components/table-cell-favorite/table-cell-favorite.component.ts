@@ -22,19 +22,6 @@ export class TableCellFavoriteComponent {
     this.handler = injectedHandler;
   }
 
-
-  ngOnInit(): void {
-    if (this.data.register) {
-      this.data.register(this);
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.data.unregister) {
-      this.data.unregister();
-    }
-  }
-
   onChange() {
     this.value = !this.value;
     const handlerFn = this.handler[TableCellFavoriteComponent.onChangeFavorite];
