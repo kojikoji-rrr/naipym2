@@ -35,8 +35,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
   thLabels: {[key:string]: FlexibleTableColumn} = {
-    'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
-    'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
+    // 'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
+    // 'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
     'domain'         :{label:'ドメイン', colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"120px"}, rowComponent:undefined, mobile: { minWidth: '40px' }},
     'tag'            :{label:'タグ',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:TableCellCopyComponent, mobile: { minWidth: '120px', flex: '1' }},
     'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:undefined},
@@ -87,7 +87,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     // サービスのスクロールイベントを購読
     this.scrollContainerService.addScrollListener(this.onScrollContainer, this);
-    
     // ブラウザの戻るボタン対応
     window.addEventListener('popstate', this.onPopState.bind(this));
   }
@@ -102,14 +101,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.sideMenuService.clearContent();
     this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
-    
     // イベントリスナーを削除
     window.removeEventListener('popstate', this.onPopState.bind(this));
   }
 
   // ソート処理（再検索）
-  onChangeSort(event: {data: Array<{[key:string]: any}>, sort: {[key:string]:boolean}}) {
-    this.currentSort = event.sort;
+  onChangeSort() {
     this.search();
   }
 
@@ -163,8 +160,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           const fixedOriginalJson = item['original_image'].replace(/\\/g, '\\\\');
           const originalImages = JSON.parse(fixedOriginalJson);
           if (Array.isArray(originalImages) && originalImages.length > 0) {
-            // const randomOriginal = originalImages[Math.floor(Math.random() * originalImages.length)];
-            const randomOriginal = originalImages[0];
+            const randomOriginal = originalImages[Math.floor(Math.random() * originalImages.length)];
             processedItem['url'] = randomOriginal['url'];
             processedItem['img_path'] = randomOriginal['filepath'];
             processedItem['img_name'] = randomOriginal['filename'];
@@ -184,8 +180,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           const fixedGenerateJson = item['generate_image'].replace(/\\/g, '\\\\');
           const generateImages = JSON.parse(fixedGenerateJson);
           if (Array.isArray(generateImages) && generateImages.length > 0) {
-            // const randomGenerate = generateImages[Math.floor(Math.random() * generateImages.length)];
-            const randomGenerate = generateImages[0];
+            const randomGenerate = generateImages[Math.floor(Math.random() * generateImages.length)];
             processedItem['gen_model'] = randomGenerate['model'];
             processedItem['gen_path'] = randomGenerate['filepath'];
             processedItem['gen_name'] = randomGenerate['filename'];

@@ -46,10 +46,9 @@ export interface InjectedData {
 @Component({
   selector: 'app-flexible-table',
   imports: [CommonModule],
-  templateUrl: 'flexible-table.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: 'flexible-table.component.html'
 })
-export class FlexibleTableComponent implements OnInit{
+export class FlexibleTableComponent {
   // 表示データ
   @Input() data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -65,62 +64,52 @@ export class FlexibleTableComponent implements OnInit{
   // 行の高さ（全体指定）
   @Input() rowHeight?: string;
   // ソートイベント（未設定の場合デフォルト処理）
-  @Output() sortEvent = new EventEmitter<{data:Array<{[key:string]: any}>, sort:{[key:string]: boolean}}>();
+  @Output() sortEvent = new EventEmitter<void>();
   
-  // ソート状態
-  currentSort: {[key:string]: boolean} = {};
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
 
   constructor(
     public injector: Injector,
-    private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private sanitizer: DomSanitizer
   ) {}
-
-  ngOnInit() {
-     this.currentSort = this.sortedColumns;
-  }
 
   onChangeSort(key: string) {
     // ソートキー追加（新しいオブジェクトを作成）
-    if (!this.currentSort.hasOwnProperty(key)) {
-      this.currentSort[key] = false;
-    } else if (!this.currentSort[key]) {
-      this.currentSort[key] = true;
+    if (!this.sortedColumns.hasOwnProperty(key)) {
+      this.sortedColumns[key] = false;
+    } else if (!this.sortedColumns[key]) {
+      this.sortedColumns[key] = true;
     } else {
-      delete this.currentSort[key];
+      delete this.sortedColumns[key];
     }
     // ソート処理
     this.sort();
-    this.cdr.markForCheck();
   }
 
   clearSort() {
-    this.currentSort = {};
+    this.sortedColumns = {};
     this.sort();
-    this.cdr.markForCheck(); 
   }
 
   sort() {
     if (this.sortEvent.observers.length > 0) {
       // イベント設定済ならイベント発火
       // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
-      this.sortEvent.emit({data: this.data, sort: this.currentSort});
+      this.sortEvent.emit();
     } else {
       // イベント未設定ならデフォルトのソート処理を実行
       // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
       this.data.sort((a, b) => {
-        for (const key in this.currentSort) {
-          if (this.currentSort.hasOwnProperty(key)) {
-            const order = this.currentSort[key] ? 1 : -1;
+        for (const key in this.sortedColumns) {
+          if (this.sortedColumns.hasOwnProperty(key)) {
+            const order = this.sortedColumns[key] ? 1 : -1;
             if (a[key] < b[key]) return -1 * order;
             if (a[key] > b[key]) return 1 * order;
           }
         }
         return 0;
       });
-      this.cdr.markForCheck();
     }
   }
   

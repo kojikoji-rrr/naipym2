@@ -10,7 +10,7 @@
               (click)="onChangeSort(key)">
             @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
             <span class="align-middle text-xs">
-              @if (currentSort[key] === true) {▲} @else if (currentSort[key] === false) {▼}
+              @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼}
             </span>
           </th>
         }
@@ -62,7 +62,7 @@
                     <span class="text-gray-500 text-[10px] mb-1 cursor-pointer hover:text-gray-700" (click)="onChangeSort(key)">
                       @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
                       <span class="align-middle text-[8px] ml-1">
-                        @if (currentSort[key] === true) {▲} @else if (currentSort[key] === false) {▼}
+                        @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼}
                       </span>
                     </span>
                     <div class="text-gray-900" 
