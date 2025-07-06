@@ -8,7 +8,6 @@ import { Component, Input } from '@angular/core';
 })
 export class ContentSpinnerComponent {
   @Input() showSpinner:boolean = false;
-  @Input() showContentAlways:boolean = false;
   @Input() size: string = '48px';
   @Input() padding:string = '48px';
 }

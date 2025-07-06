@@ -3,7 +3,7 @@
   <table class="min-w-full table-fixed bg-white border border-gray-300 shadow-sm rounded-lg">
     <thead>
       <tr class="bg-gray-50">
-        @for (key of getVisibleColumns(); track key) {
+        @for (key of visibleColumns; track key) {
           <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
               [ngClass]="thLabels[key].colClass"
               [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
@@ -18,11 +18,11 @@
     </thead>
     <tbody class="bg-transparent divide-y divide-gray-200">
       @if (data.length===0) {
-        <tr><td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length"> --- No data --- </td></tr>
+        <tr><td class="text-center text-gray-400" [attr.colspan]="visibleColumns.length"> --- No data --- </td></tr>
       } @else {
-        @for (row of data; track trackByFn($index, row)) {
+        @for (row of data; track row) {
           <tr class="hover:bg-gray-50" [style.height]="rowHeight || 'auto'">
-            @for (key of getVisibleColumns(); track key) {
+            @for (key of visibleColumns; track key) {
               <td
                 [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
                 [ngClass]="thLabels[key] ? thLabels[key].rowClass : ''"
@@ -49,12 +49,12 @@
     <div class="text-center text-gray-400 py-8"> --- No data --- </div>
   } @else {
     <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden">
-      @for (row of data; track trackByFn($index, row); let last = $last) {
+      @for (row of data; track row; let last = $last) {
         <div class="border-b border-gray-300" [class.border-b-0]="last">
           <!-- 上部: データ情報（横スクロール可能） -->
           <div class="border-b border-gray-200 overflow-x-auto">
             <div class="flex gap-2 p-2 text-xs" style="min-width: 600px;">
-              @for (key of getVisibleColumns(); track key) {
+              @for (key of visibleColumns; track key) {
                 @if (key !== 'img_url' && key !== 'gen_url') {
                   <div class="flex flex-col" 
                        [class.items-center]="isSmallColumn(key)"
@@ -89,7 +89,7 @@
           
           <!-- 下部: 画像表示エリア -->
           <div class="flex h-48">
-            @for (imageKey of getImageColumns(); track imageKey; let isLast = $last) {
+            @for (imageKey of imageColumns; track imageKey; let isLast = $last) {
               <div class="flex-1 flex items-center justify-center p-2" 
                    [class.border-r]="!isLast"
                    [class.border-gray-200]="!isLast"
