@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, ViewChildren, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector } from '@angular/core';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
-import { isNumberObject } from 'util/types';
 
 // 列定義
 export interface FlexibleTableColumn {
@@ -47,9 +46,8 @@ export interface InjectedData {
   selector: 'app-flexible-table',
   imports: [CommonModule],
   templateUrl: 'flexible-table.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FlexibleTableComponent implements OnInit{
+export class FlexibleTableComponent {
   // 表示データ
   @Input() data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -58,8 +56,6 @@ export class FlexibleTableComponent implements OnInit{
   @Input() hideColumns: Array<string> = [];
   // キー項目
   @Input() trackByKeys: Array<string> = [];
-  // ソート初期値
-  @Input() sortedColumns: {[key:string]: boolean} = {}
   // 親コンポーネント参照
   @Input() parentComponent?: any;
   // 行の高さ（全体指定）
@@ -74,13 +70,8 @@ export class FlexibleTableComponent implements OnInit{
 
   constructor(
     public injector: Injector,
-    private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private sanitizer: DomSanitizer
   ) {}
-
-  ngOnInit() {
-     this.currentSort = this.sortedColumns;
-  }
 
   onChangeSort(key: string) {
     // ソートキー追加（新しいオブジェクトを作成）
@@ -93,13 +84,16 @@ export class FlexibleTableComponent implements OnInit{
     }
     // ソート処理
     this.sort();
-    this.cdr.markForCheck();
+  }
+
+  setSort(sortedColumns:{[key:string]: boolean}, callEmit:boolean=false) {
+    this.currentSort = sortedColumns;
+    if (callEmit) this.sort();
   }
 
   clearSort() {
     this.currentSort = {};
     this.sort();
-    this.cdr.markForCheck(); 
   }
 
   sort() {
@@ -120,7 +114,6 @@ export class FlexibleTableComponent implements OnInit{
         }
         return 0;
       });
-      this.cdr.markForCheck();
     }
   }
   

@@ -87,7 +87,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     // サービスのスクロールイベントを購読
     this.scrollContainerService.addScrollListener(this.onScrollContainer, this);
-    
     // ブラウザの戻るボタン対応
     window.addEventListener('popstate', this.onPopState.bind(this));
   }
@@ -95,6 +94,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   async ngAfterViewInit(): Promise<void> {
     // ビューの初期化後にテンプレートをサービスにセットする
     this.sideMenuService.setContent(this.sideMenuContent);
+    // ソート初期化
+    this.artistTable.setSort(this.currentSort);
     // 初回ロード
     this.search();
   }
@@ -102,7 +103,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.sideMenuService.clearContent();
     this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
-    
     // イベントリスナーを削除
     window.removeEventListener('popstate', this.onPopState.bind(this));
   }
