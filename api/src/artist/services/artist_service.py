@@ -14,6 +14,24 @@ import os
 # WebP用のMIMEタイプを手動で追加
 mimetypes.add_type('image/webp', '.webp')
 
+def get_artist_master():
+    con = DB_SERVICE.open_session()
+    result = {
+        'notelist': []
+    }
+       
+    try:
+        # メモ入力リスト取得
+        query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_notelist_query.sql")
+        notelist = DB_SERVICE.get_query_result_by_text(con, query)
+        if notelist: result['notelist'] = notelist
+        
+        return result
+    except Exception as e:
+        raise e
+    finally:
+        con.close()
+
 def get_artists_data_and_total(req:SearchRequest):
     con = DB_SERVICE.open_session()
     query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_detail_query.sql")
@@ -24,11 +42,7 @@ def get_artists_data_and_total(req:SearchRequest):
         # 結果取得
         result = DB_SERVICE.get_query_result_by_text(con, query, req.sort, req.limit, req.offset)
         # 結果を辞書形式に変換
-        if result:
-            data = [dict(row._mapping) if hasattr(row, '_mapping') else dict(row) for row in result]
-        else:
-            data = []
-        return {'total': total, 'result': data}
+        return {'total': total, 'result': result}
     except Exception as e:
         raise e
     finally:
@@ -42,11 +56,7 @@ def get_artists_data(req:SearchRequest):
         # 結果取得
         result = DB_SERVICE.get_query_result_by_text(con, query, req.sort, req.limit, req.offset)
         # 結果を辞書形式に変換
-        if result:
-            data = [dict(row._mapping) if hasattr(row, '_mapping') else dict(row) for row in result]
-        else:
-            data = []
-        return data
+        return result
     except Exception as e:
         raise e
     finally:

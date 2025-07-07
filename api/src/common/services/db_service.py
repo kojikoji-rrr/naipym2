@@ -99,7 +99,7 @@ class DBService:
 
         return total
 
-    def get_query_result_by_text(self, con:Session, query:str, sort:Dict[str,bool]|None = None, limit:int|None = None, offset:int|None = None):
+    def get_query_result_by_text(self, con:Session, query:str, sort:Dict[str,bool]|None = None, limit:int|None = None, offset:int|None = None) -> list[dict|str]:
         try:
             q = query
             if sort is not None:
@@ -108,8 +108,22 @@ class DBService:
                 q = q + " " + self._create_limit_offset(limit, offset)
             result_query = text(q)
             data = con.execute(result_query).fetchall()
+            
+            return self._convert_result_by_list(data)
         except Exception as e:
             raise e
+
+    def _convert_result_by_list(self, result) -> list[dict|str]:
+        if not result:
+            return []
         
-        return data
+        if hasattr(result[0], '_mapping'):
+            values = list(result[0]._mapping.values())
+        else:
+            values = list(result[0].values()) if hasattr(result[0], 'values') else list(result[0])
+        
+        if len(values) == 1:
+            return [row[0] for row in result]
+        else:
+            return [dict(row._mapping) if hasattr(row, '_mapping') else dict(row) for row in result]
     

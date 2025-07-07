@@ -1,1 +1,1 @@
-<input class="w-full" type="text" [(ngModel)]="value" (change)="onChange()" />
+<input type="text" class="w-full h-full" [value]="value" (blur)="onBlur($event)" />

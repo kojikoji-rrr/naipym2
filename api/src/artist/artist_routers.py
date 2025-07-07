@@ -1,13 +1,18 @@
 from fastapi import APIRouter, Response
 from fastapi import Query as QueryParam
-from fastapi.responses import FileResponse, JSONResponse
-from src.artist.services.artist_service import get_artists_data_and_total, get_artists_data, get_image_content, get_image_data, get_image_type, get_video_content, get_video_data
+from fastapi.responses import JSONResponse
+from src.artist.services.artist_service import get_artist_master, get_artists_data_and_total, get_artists_data, get_image_content, get_image_data, get_image_type, get_video_content, get_video_data
 from src.artist.models.search_request import SearchRequest
 from main import API_BASE, IMAGES_DIR, RESOURCES_DIR
 import json
 
 BASE_URI = f"{API_BASE}/artist"
 router = APIRouter()
+
+@router.get(f"{BASE_URI}/master")
+def get_master():
+    res = get_artist_master()
+    return JSONResponse(content=res)
 
 @router.get(f"{BASE_URI}/data_and_total")
 def search_artists(limit: int = 50, offset: int = 0, sort: str = QueryParam("{}")):

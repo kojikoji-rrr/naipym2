@@ -1,13 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { InjectedData } from '../../../common/components/flexible-table/flexible-table.component';
 
 @Component({
   selector: 'app-table-cell-textarea',
   templateUrl: "table-cell-textarea.component.html",
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule]
 })
 export class TableCellTextareaComponent {
   public static readonly onChangeInput = 'onChangeInput';
@@ -34,10 +33,15 @@ export class TableCellTextareaComponent {
     }
   }
 
-  onChange() {
-    const handlerFn = this.handler[TableCellTextareaComponent.onChangeInput];
-    if (typeof handlerFn === 'function') {
-      handlerFn(this.data, this);
+  onBlur(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (this.value !== target.value) {
+      this.value = target.value;
+      this.data.row[this.data.key] = target.value;
+      const handlerFn = this.handler[TableCellTextareaComponent.onChangeInput];
+      if (typeof handlerFn === 'function') {
+        handlerFn(this.data, this);
+      }
     }
   }
 }

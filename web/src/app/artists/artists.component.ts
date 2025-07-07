@@ -12,6 +12,7 @@ import { FlexibleModalComponent } from '../common/components/flexible-modal/flex
 import { TableCellFlagComponent } from './components/table-cell-flag/table-cell-flag.component';
 import { TableCellFavoriteComponent } from './components/table-cell-favorite/table-cell-favorite.component';
 import { TableCellTextareaComponent } from './components/table-cell-textarea/table-cell-textarea.component';
+import { ActivatedRoute } from '@angular/router';
 
 const LOAD_LIMIT = 50;
 const SHRESHOLD = 200; // 下端からの距離（px）
@@ -35,8 +36,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
   thLabels: {[key:string]: FlexibleTableColumn} = {
-    // 'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
-    // 'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
+    'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
+    'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
     'domain'         :{label:'ドメイン', colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"120px"}, rowComponent:undefined, mobile: { minWidth: '40px' }},
     'tag'            :{label:'タグ',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:TableCellCopyComponent, mobile: { minWidth: '120px', flex: '1' }},
     'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:undefined},
@@ -77,12 +78,20 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   modalImageB?:ImageModalData;
   // ソート情報
   currentSort: {[key:string]: boolean} = {'post_count': false};
-  
+  // メモ入力リスト
+  memoList: string[] = [];
+
   constructor(
     private sideMenuService: SideMenuService,
     private apiService: ApiService,
-    private scrollContainerService: ScrollContainerService
-  ) {}
+    private scrollContainerService: ScrollContainerService,
+    private route: ActivatedRoute
+  ) {
+    // 親からのデータ取得
+    this.route.data.subscribe(data => {
+      this.memoList = data['master'].notelist;
+    });
+  }
 
   ngOnInit() {
     // サービスのスクロールイベントを購読
@@ -106,7 +115,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ソート処理（再検索）
-  onChangeSort() {
+  onChangeSort(sortedColumns:{[key:string]: boolean}) {
+    this.currentSort = sortedColumns;
     this.search();
   }
 

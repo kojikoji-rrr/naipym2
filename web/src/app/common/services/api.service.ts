@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,12 +10,18 @@ export class ApiService {
     public API_BASE = 'rest/api';
 
     public urlResource = {
+        ARTIST_MASTER: `${this.API_BASE}/artist/master`,
         ARTIST_DATA_AND_TOTAL: `${this.API_BASE}/artist/data_and_total`,
         ARTIST_DATA: `${this.API_BASE}/artist/data`,
         ARTIST_TYPE: `${this.API_BASE}/artist/mime`
     }
 
     constructor(private http: HttpClient) {}
+
+    public async getArtistMaster(): Promise<any> {
+        const url = new URL(this.urlResource.ARTIST_MASTER, this.API_URL);
+        return await firstValueFrom(this.http.get(url.toString(), { responseType: 'json' }));
+    }
 
     public searchArtistDataAndTotal(limit:number=50, offset:number=0, sort:{[key:string]: boolean}={}): Observable<any> {
         var url = new URL(this.urlResource.ARTIST_DATA_AND_TOTAL, this.API_URL);

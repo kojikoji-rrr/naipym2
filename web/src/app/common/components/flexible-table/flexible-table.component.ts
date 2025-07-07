@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, Injector, ViewChildren, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 import { isNumberObject } from 'util/types';
 
@@ -45,7 +46,7 @@ export interface InjectedData {
 
 @Component({
   selector: 'app-flexible-table',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: 'flexible-table.component.html'
 })
 export class FlexibleTableComponent {
@@ -64,14 +65,15 @@ export class FlexibleTableComponent {
   // 行の高さ（全体指定）
   @Input() rowHeight?: string;
   // ソートイベント（未設定の場合デフォルト処理）
-  @Output() sortEvent = new EventEmitter<void>();
+  @Output() sortEvent = new EventEmitter<{[key:string]: boolean}>();
   
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
 
   constructor(
     public injector: Injector,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
 
   onChangeSort(key: string) {
@@ -96,7 +98,7 @@ export class FlexibleTableComponent {
     if (this.sortEvent.observers.length > 0) {
       // イベント設定済ならイベント発火
       // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
-      this.sortEvent.emit();
+      this.sortEvent.emit(this.sortedColumns);
     } else {
       // イベント未設定ならデフォルトのソート処理を実行
       // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
@@ -110,6 +112,7 @@ export class FlexibleTableComponent {
         }
         return 0;
       });
+      this.cdr.markForCheck();
     }
   }
   

@@ -1,13 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { InjectedData } from '../../../common/components/flexible-table/flexible-table.component';
 
 @Component({
   selector: 'app-table-cell-favorite',
   templateUrl: "table-cell-favorite.component.html",
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule]
 })
 export class TableCellFavoriteComponent {
   public static readonly onChangeFavorite = 'onChangeFavorite';
@@ -35,8 +34,10 @@ export class TableCellFavoriteComponent {
     }
   }
 
-  onChange() {
-    this.value = !this.value;
+  onToggle(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.value = target.checked;
+    this.data.row[this.data.key] = this.value;
     const handlerFn = this.handler[TableCellFavoriteComponent.onChangeFavorite];
     if (typeof handlerFn === 'function') {
       handlerFn(this.data, this);

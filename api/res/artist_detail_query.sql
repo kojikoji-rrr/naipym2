@@ -29,8 +29,8 @@ FROM (
         ']' as generate_image,
         max(img.download_at) as 'last_dled_at',
         max(gen.created_at)  as 'last_gened_at',
-        list.favorite,
-        list.memo
+        f.favorite,
+        f.memo
     FROM (
             SELECT
                 t.id,
@@ -41,13 +41,10 @@ FROM (
                 CASE WHEN a.artist_id IS NOT NULL THEN a.other_names ELSE rep.other_names END as 'other_names',
                 CASE WHEN a.artist_id IS NOT NULL THEN a.post_count  ELSE rep.post_count  END as 'post_count',
                 CASE WHEN a.artist_id IS NOT NULL THEN a.is_banned   ELSE rep.is_banned   END as 'is_banned',
-                CASE WHEN a.artist_id IS NOT NULL THEN a.is_deleted  ELSE rep.is_deleted  END as 'is_deleted',
-				f.favorite,
-				f.memo
+                CASE WHEN a.artist_id IS NOT NULL THEN a.is_deleted  ELSE rep.is_deleted  END as 'is_deleted'
             FROM
                 tag_data t
                 LEFT OUTER JOIN artist_data a ON t.tag = a.artist_name
-				LEFT OUTER JOIN favorite f ON t.id = f.tag_id
                 LEFT OUTER JOIN (
                     SELECT t1.id as 'rid', ra.*
                     FROM   tag_data t1, tag_data t2, tags_relation tr LEFT OUTER JOIN artist_data ra ON t2.tag = ra.artist_name
@@ -61,6 +58,7 @@ FROM (
         LEFT OUTER JOIN image_data img ON pt.url = img.url
         LEFT OUTER JOIN artist_generate_relation gr ON list.artist_id = gr.artist_id
         LEFT OUTER JOIN generate_data gen ON gr.generate_id = gen.id
+		LEFT OUTER JOIN favorite f ON list.id = f.tag_id
     GROUP BY
         list.tag, list.artist_id, artist_name, other_names, post_count, is_banned, is_deleted
 ) result

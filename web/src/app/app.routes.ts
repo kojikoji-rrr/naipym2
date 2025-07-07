@@ -5,10 +5,20 @@ import { SandboxComponent } from './sandbox/sandbox.component';
 import { TabPage1Component } from './sandbox/views/tab-page1/tab-page1.component';
 import { TabPage2Component } from './sandbox/views/tab-page2/tab-page2.component';
 import { TabPage3Component } from './sandbox/views/tab-page3/tab-page3.component';
+import { ArtistsMasterResolver } from './common/resolvers/artists-master.resolver';
 
 export const routes: Routes = [
-  { path: 'artists', component: ArtistsComponent },
-  { path: 'tags',    component: TagsComponent },
+  {
+    path: 'artists',
+    component: ArtistsComponent,
+    resolve: {
+      master: ArtistsMasterResolver
+    }
+  },
+  {
+    path: 'tags',
+    component: TagsComponent
+  },
   { 
     path: 'sandbox', 
     component: SandboxComponent,

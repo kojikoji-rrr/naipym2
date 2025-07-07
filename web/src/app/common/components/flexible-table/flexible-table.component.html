@@ -27,7 +27,7 @@
                 [style.width]="thLabels[key] && thLabels[key].width ? thLabels[key].width : 'auto'"
                 [ngClass]="thLabels[key] ? thLabels[key].rowClass : ''"
                 [ngStyle]="thLabels[key] ? thLabels[key].rowStyle : null">
-                @if (row[key]) {
+                @if (row[key] !== undefined) {
                   @if (thLabels.hasOwnProperty(key) && thLabels[key].rowComponent) {
                     <ng-container *ngComponentOutlet="thLabels[key].rowComponent; injector:createInjector(key,row);"></ng-container>
                   } @else {
