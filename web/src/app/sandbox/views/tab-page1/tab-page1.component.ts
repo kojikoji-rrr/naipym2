@@ -1,10 +1,11 @@
 import { Component, EventEmitter } from '@angular/core';
-import { FlexibleTableComponent } from '../../../common/components/flexible-table/flexible-table.component';
+import { FlexibleTableDesktopComponent } from '../../../common/components/flexible-table/table-desktop/flexible-table-desktop.component';
+import { FlexibleTableMobileComponent } from '../../../common/components/flexible-table/table-mobile/flexible-table-mobile.component';
 import { FlexibleModalComponent } from '../../../common/components/flexible-modal/flexible-modal.component';
 
 @Component({
   selector: 'app-tab-page1',
-  imports: [FlexibleTableComponent, FlexibleModalComponent],
+  imports: [FlexibleTableDesktopComponent, FlexibleTableMobileComponent, FlexibleModalComponent],
   templateUrl: './tab-page1.component.html'
 })
 export class TabPage1Component {

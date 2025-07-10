@@ -1,20 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { InjectedData } from '../../../common/components/flexible-table/flexible-table.component';
+import { CellBaseComponent } from '../cell-base/cell-base.component';
 
 @Component({
-  selector: 'app-table-cell-copy',
-  templateUrl: "table-cell-copy.component.html",
+  selector: 'app-cell-copy',
+  templateUrl: "cell-copy.component.html",
   standalone: true
 })
-export class TableCellCopyComponent {
-  public value?:any;
-
-  constructor(
-    @Inject('data') public data: InjectedData
-  ) {
-    this.value = data.row[data.key];
-  }
-
+export class CellCopyComponent extends CellBaseComponent {
   // クリップボードへコピー
   copyToClipboard(event: Event): void {
     // イベント伝播を停止

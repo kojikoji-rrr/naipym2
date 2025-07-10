@@ -16,7 +16,12 @@
       "Bash(killall:*)",
       "Bash(ls:*)",
       "Bash(PYTHONPATH=/mnt/d/Naipym2/api python -c \"from main import IMAGES_DIR; print(IMAGES_DIR)\")",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(for file in table-cell-*/table-cell-*.component.ts)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(sed:*)",
+      "Bash(done)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

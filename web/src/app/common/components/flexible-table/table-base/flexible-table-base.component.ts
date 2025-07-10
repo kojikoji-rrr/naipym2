@@ -1,55 +1,40 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, ViewChildren, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
-import { isNumberObject } from 'util/types';
 
-// 列定義
+// 共通列定義
 export interface FlexibleTableColumn {
   // ヘッダ名
   label: string;
-  // ヘッダclass
-  colClass?: string;
-  // class
-  rowClass?: string;
-  // style
-  rowStyle?: {[key:string]: string};
   // データ表示コンポーネント
-  rowComponent?: any;
+  component?: any;
+  // 子の初期化用データ
+  args?: any;
   // コンポーネントハンドラー（親コンポーネントのメソッド名を文字列で指定）
-  handler?: { [key: string]: (data: any, component?: any) => void };
-  // 列幅
-  width?: string;
-  // モバイル版設定
-  mobile?: {
-    // 小さい列として扱うか（中央揃え等）
-    isSmall?: boolean;
-    // モバイル版での最小幅
-    minWidth?: string;
-    // フレックス設定
-    flex?: string;
-    // 画像列として扱うか
-    isImage?: boolean;
-    // 画像なし時のテキスト
-    emptyText?: string;
-  };
+  handler?: {[key: string]: (data: any, component?: any) => void};
 }
 
-// Injectorデータ定義
+// 子に渡すデータ定義
 export interface InjectedData {
+  // 呼出し元
+  parentComponent: any;
+  // カラムキー
   key: string;
+  // 列全体のデータ
   row: { [key: string]: any };
+  // 登録処理
   register: (instance: any) => void;
+  // 破棄処理
   unregister: () => void;
-  parentComponent: any; // 親コンポーネントへの参照を追加
 }
 
 @Component({
-  selector: 'app-flexible-table',
-  imports: [CommonModule, FormsModule],
-  templateUrl: 'flexible-table.component.html'
+  template: '',
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
-export class FlexibleTableComponent {
+export class FlexibleTableBaseComponent {
   // 表示データ
   @Input() data: Array<{[key:string]: any}> = [];
   // ヘッダラベル
@@ -62,11 +47,8 @@ export class FlexibleTableComponent {
   @Input() sortedColumns: {[key:string]: boolean} = {}
   // 親コンポーネント参照
   @Input() parentComponent?: any;
-  // 行の高さ（全体指定）
-  @Input() rowHeight?: string;
   // ソートイベント（未設定の場合デフォルト処理）
   @Output() sortEvent = new EventEmitter<{[key:string]: boolean}>();
-  
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
 
@@ -96,12 +78,10 @@ export class FlexibleTableComponent {
 
   sort() {
     if (this.sortEvent.observers.length > 0) {
-      // イベント設定済ならイベント発火
-      // ※ 呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
+      // イベント設定済ならイベント発火。呼出元でソート後の結果をdataに再設定する可能性もあるのでソートはしない。
       this.sortEvent.emit(this.sortedColumns);
     } else {
-      // イベント未設定ならデフォルトのソート処理を実行
-      // dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
+      // イベント未設定ならデフォルトのソート処理を実行。dataに対してsortColumnの優先順でソートを行う（trueなら昇順、falseなら降順）
       this.data.sort((a, b) => {
         for (const key in this.sortedColumns) {
           if (this.sortedColumns.hasOwnProperty(key)) {
@@ -126,12 +106,10 @@ export class FlexibleTableComponent {
 
   getVisibleColumns(): string[] {
     if (this.data.length === 0) return [];
-    
     // thLabelsが空でない場合は、thLabelsのキーの順序で表示
     if (Object.keys(this.thLabels).length > 0) {
       return Object.keys(this.thLabels).filter(key => !this.hideColumns.includes(key));
     }
-    
     // thLabelsが空の場合は従来通り（データのキー全てから hideColumns を除外）
     const allKeys = Object.keys(this.data[0]);
     return allKeys.filter(key => !this.hideColumns.includes(key));
@@ -144,9 +122,9 @@ export class FlexibleTableComponent {
   createInjector(key:string, row:{[key:string]:any}): Injector {
     const trackByValue = this.trackByFn(0, row);
     const data: InjectedData = {
+      parentComponent: this.parentComponent,
       key: key,
       row: row,
-      parentComponent: this.parentComponent,
       register: (instance: any) => {
         if (!this.rowComponents.has(trackByValue)) {
           this.rowComponents.set(trackByValue, new Map());
@@ -160,6 +138,7 @@ export class FlexibleTableComponent {
     return Injector.create({
       providers: [
         {provide:'data', useValue: data},
+        {provide:'args', useValue: this.thLabels[key].args},
         {provide:'handler', useValue: this.thLabels[key].handler || {}}
       ],
       parent: this.injector
@@ -168,37 +147,5 @@ export class FlexibleTableComponent {
 
   getSafeHtml(htmlString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
-  }
-
-  // モバイル版用のメソッド
-  isSmallColumn(key: string): boolean {
-    return this.thLabels[key]?.mobile?.isSmall || false;
-  }
-
-  getMobileColumnStyle(key: string): { [key: string]: string } {
-    const mobile = this.thLabels[key]?.mobile;
-    if (!mobile) {
-      return { 'min-width': '100px' };
-    }
-    
-    const style: { [key: string]: string } = {};
-    if (mobile.minWidth) {
-      style['min-width'] = mobile.minWidth;
-    }
-    if (mobile.flex) {
-      style['flex'] = mobile.flex;
-    }
-    
-    return style;
-  }
-
-  getImageColumns(): string[] {
-    return this.getVisibleColumns().filter(key => 
-      this.thLabels[key]?.mobile?.isImage === true
-    );
-  }
-
-  getImageEmptyText(key: string): string {
-    return this.thLabels[key]?.mobile?.emptyText || '画像なし';
   }
 }

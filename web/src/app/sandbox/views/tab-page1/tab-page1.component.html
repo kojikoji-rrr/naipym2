@@ -8,19 +8,39 @@
   </div>
   <p class="mt-4">サンプルFlexibleTable</p>
   <div class="w-full">
-    <app-flexible-table
-      [data]="[
-        {'artist':'Artist1', 'works': 10, 'age': 20},
-        {'artist':'Artist2', 'works': 90, 'age': 50},
-        {'artist':'Artist3', 'works': 50, 'age': 80},
-      ]"
-      [thLabels]="{
-        'artist': {label: '絵師名', rowClass: 'flex justify-center', width: '50%'},
-        'works': {label: '作品数'},
-        'age': {label: '年齢'}
-      }"
-      [hideColumns]="[]"
-    ></app-flexible-table>
+    <!-- デスクトップ版テーブル (md以上) -->
+    <div class="hidden md:block">
+      <app-flexible-table-desktop
+        [data]="[
+          {'artist':'Artist1', 'works': 10, 'age': 20},
+          {'artist':'Artist2', 'works': 90, 'age': 50},
+          {'artist':'Artist3', 'works': 50, 'age': 80},
+        ]"
+        [thLabels]="{
+          'artist': {label: '絵師名'},
+          'works': {label: '作品数'},
+          'age': {label: '年齢'}
+        }"
+        [hideColumns]="[]">
+      </app-flexible-table-desktop>
+    </div>
+
+    <!-- モバイル版テーブル (md未満) -->
+    <div class="block md:hidden">
+      <app-flexible-table-mobile
+        [data]="[
+          {'artist':'Artist1', 'works': 10, 'age': 20},
+          {'artist':'Artist2', 'works': 90, 'age': 50},
+          {'artist':'Artist3', 'works': 50, 'age': 80},
+        ]"
+        [thLabels]="{
+          'artist': {label: '絵師名'},
+          'works': {label: '作品数'},
+          'age': {label: '年齢'}
+        }"
+        [hideColumns]="[]">
+      </app-flexible-table-mobile>
+    </div>
   </div>
 </div>
 <!--サンプルモーダル-->

@@ -1,18 +1,15 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ElementRef } from '@angular/core';
 import { SideMenuService } from '../common/services/side-menu.service';
 import { PageHeaderComponent } from '../common/components/page-header/page-header.component';
-import { FlexibleTableColumn, FlexibleTableComponent, InjectedData } from '../common/components/flexible-table/flexible-table.component';
+import { FlexibleTableDesktopColumn, FlexibleTableDesktopComponent } from '../common/components/flexible-table/table-desktop/flexible-table-desktop.component';
 import { ContentSpinnerComponent } from '../common/components/content-spinner/content-spinner.component';
 import { ApiService } from '../common/services/api.service';
 import { ScrollContainerService } from '../common/services/scroll-container.service';
-import { TableCellLinkComponent } from './components/table-cell-link/table-cell-link.component';
-import { TableCellCopyComponent } from './components/table-cell-copy/table-cell-copy.component';
-import { TableCellThumbComponent } from './components/table-cell-thumb/table-cell-thumb.component';
 import { FlexibleModalComponent } from '../common/components/flexible-modal/flexible-modal.component';
-import { TableCellFlagComponent } from './components/table-cell-flag/table-cell-flag.component';
-import { TableCellFavoriteComponent } from './components/table-cell-favorite/table-cell-favorite.component';
-import { TableCellTextareaComponent } from './components/table-cell-textarea/table-cell-textarea.component';
 import { ActivatedRoute } from '@angular/router';
+import { FlexibleTableColumn } from '../common/components/flexible-table/table-base/flexible-table-base.component';
+import { FlexibleTableMobileColumn, FlexibleTableMobileComponent } from '../common/components/flexible-table/table-mobile/flexible-table-mobile.component';
+import { CellCopy, CellFavorite, CellFlag, CellLabel, CellLink, CellTextarea, CellThumb } from '../common/services/flexible-table.service';
 
 const LOAD_LIMIT = 50;
 const SHRESHOLD = 200; // 下端からの距離（px）
@@ -24,43 +21,14 @@ export interface ImageModalData {
 
 @Component({
   selector: 'app-artists',
-  imports: [PageHeaderComponent, FlexibleTableComponent, ContentSpinnerComponent, FlexibleModalComponent],
+  imports: [PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, ContentSpinnerComponent, FlexibleModalComponent],
   templateUrl: './artists.component.html'
 })
 export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
-  @ViewChild('artistTable') artistTable!: FlexibleTableComponent;
-  
-  // 表示データ
-  data: Array<{[key:string]: any}> = [];
-  // ヘッダラベル
-  thLabels: {[key:string]: FlexibleTableColumn} = {
-    'favorite'       :{label:'Fav',     colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"50px"},  rowComponent:TableCellFavoriteComponent, handler: { [TableCellFavoriteComponent.onChangeFavorite]: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value) }, mobile: { minWidth: '50px' }},
-    'memo'           :{label:'memo',    colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"100px"}, rowComponent:TableCellTextareaComponent, handler: { [TableCellTextareaComponent.onChangeInput]: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined) }, mobile: { minWidth: '40px' }},
-    'domain'         :{label:'ドメイン', colClass:"text-xs",  rowClass:"text-xs", rowStyle:{"max-width":"120px"}, rowComponent:undefined, mobile: { minWidth: '40px' }},
-    'tag'            :{label:'タグ',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:TableCellCopyComponent, mobile: { minWidth: '120px', flex: '1' }},
-    'artist_id'      :{label:'絵師ID',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:undefined},
-    'artist_name'    :{label:'絵師名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"160px"}, rowComponent:TableCellCopyComponent, mobile: { minWidth: '120px', flex: '1' }},
-    'other_names'    :{label:'他名称',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"max-width":"200px"}, rowComponent:undefined },
-    'post_count'     :{label:'post',    colClass:"text-xs", rowClass:"text-xs text-center", rowStyle:{"width":"50px"}, rowComponent:undefined, mobile: { isSmall: true, minWidth: '50px' }},
-    'is_banned'      :{label:'BAN',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"width":"50px"}, rowComponent:TableCellFlagComponent, mobile: { isSmall: true, minWidth: '40px' }},
-    'is_deleted'     :{label:'DEL',     colClass:"text-xs", rowClass:"text-xs", rowStyle:{"width":"50px"}, rowComponent:TableCellFlagComponent, mobile: { isSmall: true, minWidth: '40px' }},
-    'url'            :{label:'URL',     colClass:"text-xs", rowClass:"text-xs text-center", rowStyle:{"width":"60px"}, rowComponent:TableCellLinkComponent, mobile: { isSmall: true, minWidth: '50px' }},
-    'img_url'        :{label:'元画像',   colClass:"text-xs", rowClass:"text-xs", rowStyle:{"width":"20%"}, rowComponent:TableCellThumbComponent, handler: { [TableCellThumbComponent.onClickImage]: (data) => this.showImageModal(data.row['img_path'], data.row['gen_path']) }, mobile: { isImage: true, emptyText: '画像なし' }},
-    'img_name'       :{label:'画像名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'dled_at'        :{label:'ＤＬ日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'last_dled_at'   :{label:'最終ＤＬ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'gen_model'      :{label:'生成ﾓﾃﾞﾙ', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'gen_url'        :{label:'生成画像', colClass:"text-xs", rowClass:"text-xs", rowStyle:{"width":"20%"}, rowComponent:TableCellThumbComponent, handler: { [TableCellThumbComponent.onClickImage]: (data) => this.showImageModal(data.row['img_path'], data.row['gen_path']) }, mobile: { isImage: true, emptyText: '生成画像なし' }},
-    'gen_name'       :{label:'生成名',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'gened_at'       :{label:'生成日',   colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined },
-    'last_gened_at'  :{label:'最終生成', colClass:"text-xs", rowClass:"text-xs", rowStyle:undefined, rowComponent:undefined }
-  }
-  // trackByキー
-  trackByKeys: Array<string> = ['tag', 'artist_id'];
-  // 非表示カラム
-  hideColumns: Array<string> = ["artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
+  @ViewChild('artistTableDesktop') artistTableDesktop!: FlexibleTableDesktopComponent;
+  @ViewChild('artistTableMobile') artistTableMobile!: FlexibleTableMobileComponent;
   // 総件数
   total:number = 0;
   // 読込済みページ数
@@ -72,13 +40,24 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   // モーダル展開制御
   isOpenImageModal: boolean = false;
   // サンプルモード
-  isSample: boolean = true;
+  isSample: boolean = false;
   // モーダル画像情報
-  modalImageA?:ImageModalData;
-  modalImageB?:ImageModalData;
+  modalImageA?:ImageModalData = undefined;
+  modalImageB?:ImageModalData = undefined;
+  // 表示データ
+  data: Array<{[key:string]: any}> = [];
+  // trackByキー
+  trackByKeys: Array<string> = [];
+  // ヘッダラベル
+  labels: {[key:string]: FlexibleTableColumn} = {};
+  // スタイル
+  desktopStyles: {[key:string]: FlexibleTableDesktopColumn} = {};
+  mobileStyles: {[key:string]: FlexibleTableMobileColumn} = {};
+  // 非表示カラム
+  hideColumns: Array<string> = [];
   // ソート情報
-  currentSort: {[key:string]: boolean} = {'post_count': false};
-  // メモ入力リスト
+  currentSort: {[key:string]: boolean} = {};
+  // メモリスト
   memoList: string[] = [];
 
   constructor(
@@ -91,6 +70,84 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.data.subscribe(data => {
       this.memoList = data['master'].notelist;
     });
+
+    // 列設定
+    this.labels = {
+      'favorite'       :CellFavorite('Fav', {onChangeFavorite: (data, component) => this.onChangeFavorite(data.row['tag_id'], undefined, component.value)}),
+      'memo'           :CellTextarea('memo', {memoList: this.memoList}, {
+        onChangeInput: (data, component) => this.onChangeFavorite(data.row['tag_id'], component.value, undefined),
+        updateMemoList: (data, component) => this.memoList = component.args.memoList
+      }),
+      'domain'         :CellLabel('ドメイン'),
+      'url'            :CellLink('URL'),
+      'tag'            :CellCopy('タグ'),
+      'artist_id'      :CellLabel('絵師ID'),
+      'artist_name'    :CellCopy('絵師名'),
+      'other_names'    :CellLabel('他名称'),
+      'post_count'     :CellLabel('post'),
+      'is_banned'      :CellFlag('BAN'),
+      'is_deleted'     :CellFlag('DEL'),
+      'img_url'        :CellThumb('元画像', {onClickImage:(data) => this.showImageModal(data.row['img_path'], data.row['gen_path'])}),
+      'img_name'       :CellLabel('画像名'),
+      'dled_at'        :CellLabel('ＤＬ日'),
+      'last_dled_at'   :CellLabel('最終ＤＬ'),
+      'gen_model'      :CellLabel('生成ﾓﾃﾞﾙ'),
+      'gen_url'        :CellThumb('生成画像', {onClickImage: (data) => this.showImageModal(data.row['img_path'], data.row['gen_path'])}),
+      'gen_name'       :CellLabel('生成名'),
+      'gened_at'       :CellLabel('生成日'),
+      'last_gened_at'  :CellLabel('最終生成')
+    };
+    // style設定
+    this.desktopStyles = {
+      'favorite'      : {},
+      'memo'          : {},
+      'domain'        : {},
+      'url'           : {},
+      'tag'           : {},
+      'artist_id'     : {},
+      'artist_name'   : {},
+      'other_names'   : {},
+      'post_count'    : {},
+      'is_banned'     : {},
+      'is_deleted'    : {},
+      'img_url'       : {},
+      'img_name'      : {},
+      'dled_at'       : {},
+      'last_dled_at'  : {},
+      'gen_model'     : {},
+      'gen_url'       : {},
+      'gen_name'      : {},
+      'gened_at'      : {},
+      'last_gened_at' : {}
+    };
+    this.mobileStyles = {
+      'favorite'      : {width: '40px'},
+      'memo'          : {width: '140px'},
+      'domain'        : {width: '120px'},
+      'url'           : {width: '60px'},
+      'tag'           : {width: '120px'},
+      'artist_id'     : {},
+      'artist_name'   : {width: '120px'},
+      'other_names'   : {width: '180px'},
+      'post_count'    : {width: '60px'},
+      'is_banned'     : {width: '50px'},
+      'is_deleted'    : {width: '50px'},
+      'img_name'      : {},
+      'dled_at'       : {},
+      'last_dled_at'  : {},
+      'gen_model'     : {},
+      'gen_name'      : {},
+      'gened_at'      : {},
+      'last_gened_at' : {},
+      'gen_url'       : {isViewLarge:true},
+      'img_url'       : {isViewLarge:true}
+    };
+    // trackByキー
+    this.trackByKeys = ['tag', 'artist_id'];
+    // 非表示カラム
+    this.hideColumns = ["artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
+    // ソート情報
+    this.currentSort = {'post_count': false};
   }
 
   ngOnInit() {
@@ -112,6 +169,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
     // イベントリスナーを削除
     window.removeEventListener('popstate', this.onPopState.bind(this));
+  }
+
+  // ソート解除処理
+  clearSort() {
+    this.artistTableDesktop?.clearSort();
+    this.artistTableMobile?.clearSort();
   }
 
   // ソート処理（再検索）
