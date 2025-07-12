@@ -2,6 +2,7 @@ import { Component, Inject, Input, OnDestroy, OnInit, Output, EventEmitter } fro
 import { CommonModule } from '@angular/common';
 import { InjectedData } from '../../table-base/flexible-table-base.component';
 import { CellBaseComponent } from '../cell-base/cell-base.component';
+import { LazyImageDirective } from './lazy-image.directive';
 
 export interface CellThumbHandler {
   onClickImage: (data: any, component?: any) => void;
@@ -11,7 +12,7 @@ export interface CellThumbHandler {
   selector: 'app-cell-thumb',
   templateUrl: "cell-thumb.component.html",
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, LazyImageDirective]
 })
 export class CellThumbComponent extends CellBaseComponent {
   onClick() {

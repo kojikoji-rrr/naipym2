@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { SideMenuService } from '../common/services/side-menu.service';
 import { PageHeaderComponent } from '../common/components/page-header/page-header.component';
 import { FlexibleTableDesktopColumn, FlexibleTableDesktopComponent } from '../common/components/flexible-table/table-desktop/flexible-table-desktop.component';
@@ -22,7 +22,8 @@ export interface ImageModalData {
 @Component({
   selector: 'app-artists',
   imports: [PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, ContentSpinnerComponent, FlexibleModalComponent],
-  templateUrl: './artists.component.html'
+  templateUrl: './artists.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   window = window;
@@ -65,7 +66,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     private sideMenuService: SideMenuService,
     private apiService: ApiService,
     private scrollContainerService: ScrollContainerService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     // 親からのデータ取得
     this.route.data.subscribe(data => {
@@ -214,13 +216,17 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     } finally {
       this.status = 'complete';
+      this.cdr.markForCheck();
     }
   }
 
   // 取得データを加工してテーブルにセット
   push_data(response: Array<{ [key: string]: any }>): void {
-    const processedData = response.map(item => {
+    const processedData = response.map((item, index) => {
       const processedItem = { ...item };
+      
+      // 事前計算済みIDを追加（trackBy最適化用）
+      processedItem['_cachedId'] = `${item['tag']}_${item['artist_id']}_${this.data.length + index}`;
       
       // domainの処理（カンマで分割し、それぞれを最初のピリオドより前の文字列だけ抜き出し、<br>で連結）
       if (item['domain']) {
@@ -272,7 +278,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       return processedItem;
     });
     
-    this.data.push(...processedData);
+    this.data = [...this.data, ...processedData];
+    this.cdr.markForCheck();
   }
 
   // スクロールイベント

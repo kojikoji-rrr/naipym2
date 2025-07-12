@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
 
@@ -32,7 +32,8 @@ export interface InjectedData {
 @Component({
   template: '',
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlexibleTableBaseComponent {
   // 表示データ
@@ -51,6 +52,8 @@ export class FlexibleTableBaseComponent {
   @Output() sortEvent = new EventEmitter<{[key:string]: boolean}>();
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
+  // SafeHtmlキャッシュ
+  private safeHtmlCache = new Map<string, SafeHtml>();
 
   constructor(
     public injector: Injector,
@@ -97,6 +100,11 @@ export class FlexibleTableBaseComponent {
   }
   
   trackByFn(index: number, row: { [key: string]: any }): any {
+    // 事前計算済みIDがある場合は優先使用
+    if (row['_cachedId']) {
+      return row['_cachedId'];
+    }
+    
     if (this.trackByKeys && this.trackByKeys.length > 0) {
       const keyValue = this.trackByKeys.map(key => row[key]).join('_');
       return keyValue ?? index;
@@ -147,5 +155,14 @@ export class FlexibleTableBaseComponent {
 
   getSafeHtml(htmlString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
+  }
+
+  // キャッシュ付きSafeHTML取得
+  getCachedSafeHtml(htmlString: string): SafeHtml {
+    const cacheKey = String(htmlString);
+    if (!this.safeHtmlCache.has(cacheKey)) {
+      this.safeHtmlCache.set(cacheKey, this.sanitizer.bypassSecurityTrustHtml(htmlString));
+    }
+    return this.safeHtmlCache.get(cacheKey)!;
   }
 }
