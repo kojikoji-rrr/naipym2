@@ -11,8 +11,10 @@ export interface FlexibleTableMobileColumn {
   rowClass?: string;
   // 値スタイル
   rowStyles?: {[key:string]: any};
+  // 画像上部か否か
+  isViewMiddle?: boolean;
   // ヘッダデータか否か
-  isViewLarge?: boolean;
+  isViewBottom?: boolean;
 }
 
 @Component({
@@ -37,11 +39,15 @@ export class FlexibleTableMobileComponent extends FlexibleTableBaseComponent {
     super(injector, sanitizer, cdr);
   }
 
-  getSmallColumns() {
-    return this.getVisibleColumns().filter(key => !this.styles[key]?.isViewLarge);
+  getTopColumns() {
+    return this.getVisibleColumns().filter(key => !this.styles[key]?.isViewMiddle && !this.styles[key]?.isViewBottom);
   }
 
-  getLargeColumns(): string[] {
-    return this.getVisibleColumns().filter(key => this.styles[key]?.isViewLarge);
+  getMiddleColumns(): string[] {
+    return this.getVisibleColumns().filter(key => this.styles[key]?.isViewMiddle);
+  }
+
+  getBottomColumns(): string[] {
+    return this.getVisibleColumns().filter(key => this.styles[key]?.isViewBottom);
   }
 }

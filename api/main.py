@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-from src.common.services.common_service import load_config
+from util import load_config
 from src.common.services.db_service import DBService
 
 ### パス設定 ###

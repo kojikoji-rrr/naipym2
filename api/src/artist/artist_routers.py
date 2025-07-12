@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 from fastapi import Query as QueryParam
 from fastapi.responses import JSONResponse
+from src.common.services.common_service import upsert_favorite
 from src.artist.services.artist_service import get_artist_master, get_artists_data_and_total, get_artists_data, get_image_content, get_image_data, get_image_type, get_video_content, get_video_data
 from src.artist.models.search_request import SearchRequest
 from main import API_BASE, IMAGES_DIR, RESOURCES_DIR
@@ -89,3 +90,9 @@ def get_content(path: str):
         return Response(content=content, media_type=mime)
     else:
         return Response(status_code=404)
+
+@router.post(f"{BASE_URI}/favorite")
+async def update_favorite(req: Request):
+    body = await req.json()
+    res = upsert_favorite(body.get("tagId"), body.get("favorite"), body.get("memo"))
+    return JSONResponse(content=res)

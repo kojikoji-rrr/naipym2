@@ -1,5 +1,8 @@
-<div class="w-full h-full flex items-center white-space break-normal">
-    <span class="cursor-pointer hover:underline select-none" (click)="copyToClipboard($event)">
+<div class="w-full h-full flex items-center break-all cursor-pointer hover:underline active:underline select-none p-2 -m-2" 
+     [class.underline]="isPressed"
+     (click)="copyToClipboard($event)" 
+     (touchstart)="onTouchStart($event)">
+    <span>
         {{ value }}
     </span>
 </div>

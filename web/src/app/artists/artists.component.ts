@@ -25,6 +25,7 @@ export interface ImageModalData {
   templateUrl: './artists.component.html'
 })
 export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
+  window = window;
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
   @ViewChild('artistTableDesktop') artistTableDesktop!: FlexibleTableDesktopComponent;
@@ -40,7 +41,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   // モーダル展開制御
   isOpenImageModal: boolean = false;
   // サンプルモード
-  isSample: boolean = false;
+  isSample: boolean = true;
   // モーダル画像情報
   modalImageA?:ImageModalData = undefined;
   modalImageB?:ImageModalData = undefined;
@@ -122,12 +123,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     this.mobileStyles = {
       'favorite'      : {width: '40px'},
-      'memo'          : {width: '140px'},
-      'domain'        : {width: '120px'},
+      'memo'          : {width: '120px'},
+      'domain'        : {width: '80px'},
       'url'           : {width: '60px'},
-      'tag'           : {width: '120px'},
+      'tag'           : {isViewMiddle:true},
       'artist_id'     : {},
-      'artist_name'   : {width: '120px'},
+      'artist_name'   : {isViewMiddle:true},
       'other_names'   : {width: '180px'},
       'post_count'    : {width: '60px'},
       'is_banned'     : {width: '50px'},
@@ -139,8 +140,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       'gen_name'      : {},
       'gened_at'      : {},
       'last_gened_at' : {},
-      'gen_url'       : {isViewLarge:true},
-      'img_url'       : {isViewLarge:true}
+      'gen_url'       : {isViewBottom:true},
+      'img_url'       : {isViewBottom:true}
     };
     // trackByキー
     this.trackByKeys = ['tag', 'artist_id'];
@@ -221,9 +222,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     const processedData = response.map(item => {
       const processedItem = { ...item };
       
-      // domainの処理（カンマを改行に変換）
+      // domainの処理（カンマで分割し、それぞれを最初のピリオドより前の文字列だけ抜き出し、<br>で連結）
       if (item['domain']) {
-        processedItem['domain'] = item['domain'].replace(/,/g, '<br>');
+        processedItem['domain'] = item['domain']
+          .split(',')
+          .map((domain: string) => domain.trim().split('.')[0])
+          .join('<br>');
       }
       
       // original_imageの処理
@@ -330,8 +334,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Favorite切り替え処理
-  onChangeFavorite(tagId:string, memo?:string, favorite?:boolean) {
-    console.log(`changed ${tagId}: Memo=${memo}, favorite=${favorite}`);
+  onChangeFavorite(tagId:number, memo?:string, favorite?:boolean) {
+    this.apiService.updateFavorite(tagId, favorite, memo).subscribe(res => {}, err => {console.error('APIでエラーが発生しました:', err)});
   }
 
   // 画像URLの生成

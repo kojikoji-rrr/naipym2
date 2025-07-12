@@ -8,19 +8,19 @@
     @for (row of data; track trackByFn($index, row); let last = $last) {
       <div class="border-b border-gray-300" [class.border-b-0]="last">
         <!-- 上データ情報 -->
-        @if (getSmallColumns().length) {
+        @if (getTopColumns().length) {
           <div class="border-b border-gray-200 overflow-x-auto">
             <div class="flex text-xs mb-2">
-              @for (key of getSmallColumns(); track key) {
+              @for (key of getTopColumns(); track key) {
                 <div class="flex flex-col" [style]="{'min-width': (styles[key] && styles[key].width) || '100px', 'height': headerHeight}">
                   <span class="w-full text-gray-500 mb-1 cursor-pointer hover:text-gray-700 text-center" (click)="onChangeSort(key)">
                     @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
                     <span class="align-middle ml-1"> @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼} </span>
                   </span>
                   <div class="w-full h-full text-gray-900" [ngClass]="(styles[key] && styles[key].rowClass) || ''" [ngStyle]="(styles[key] && styles[key].rowStyles) || undefined">
-                    @if (row[key] || (thLabels.hasOwnProperty(key) && thLabels[key].component)) {
+                    @if (row[key] !== undefined) {
                       @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
-                        <div class="w-full h-full white-space">
+                        <div class="w-full h-full">
                           <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
                         </div>
                       } @else {
@@ -35,19 +35,37 @@
             </div>
           </div>
         }
-        <!-- 下データ情報 -->
-        @if (getLargeColumns().length) {
-          <div class="flex" [style]="{height: rowHeight}">
-            @for (key of getLargeColumns(); track key; let isLast = $last) {
+        <!-- 中データ情報 -->
+        @if (getMiddleColumns().length) {
+          <div class="flex">
+            @for(key of getMiddleColumns(); track key; let isLast = $last) {
               <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
-                @if (row[key] || (thLabels.hasOwnProperty(key) && thLabels[key].component)) {
-                  <div class="w-full h-full">
-                    @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
+                @if(row[key] !== undefined) {
+                  @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
+                    <div class="w-full">
                       <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
-                    }
-                  </div>
-                } @else {
-                  <span class="text-gray-400 text-sm" [innerHTML]="getSafeHtml(row[key])"></span>
+                    </div>
+                  } @else {
+                    <span class="text-gray-400 text-sm" [innerHTML]="getSafeHtml(row[key])"></span>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+        <!-- 下データ情報 -->
+        @if (getBottomColumns().length) {
+          <div class="flex" [style]="{height: rowHeight}">
+            @for (key of getBottomColumns(); track key; let isLast = $last) {
+              <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
+                @if (row[key] !== undefined) {
+                  @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
+                    <div class="w-full h-full">
+                      <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
+                    </div>
+                  } @else {
+                    <span class="text-gray-400 text-sm" [innerHTML]="getSafeHtml(row[key])"></span>
+                  }
                 }
               </div>
             }

@@ -65,16 +65,16 @@
   <div class="flex flex-col md:flex-row gap-4 p-4 h-full overflow-hidden">
     <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
       @if (modalImageA && modalImageA.mimeType.includes("image/")) {
-        <img [src]="modalImageA.url" class="w-full h-full object-contain rounded shadow" />
+        <img [src]="modalImageA.url" class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageA.url, '_blank')"/>
       } @else if (modalImageA && modalImageA.mimeType.includes("video/")) {
-        <video [src]="modalImageA.url" controls class="w-full h-full object-contain rounded shadow"></video>
+        <video [src]="modalImageA.url" controls class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageA.url, '_blank')"></video>
       }
     </div>
     <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
       @if (modalImageB && modalImageB.mimeType.includes("image/")) {
-        <img [src]="modalImageB.url" class="w-full h-full object-contain rounded shadow" />
+        <img [src]="modalImageB.url" class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageB.url, '_blank')"/>
       } @else if (modalImageB && modalImageB.mimeType.includes("video/")) {
-        <video [src]="modalImageB.url" controls class="w-full h-full object-contain rounded shadow"></video>
+        <video [src]="modalImageB.url" controls class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageB.url, '_blank')"></video>
       }
     </div>
   </div>
