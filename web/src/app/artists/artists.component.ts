@@ -163,43 +163,24 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   async ngAfterViewInit(): Promise<void> {
     // ビューの初期化後にテンプレートをサービスにセットする
     this.sideMenuService.setContent(this.sideMenuContent);
-    // 初回ロード
-    this.search();
-  }
-
-  ngOnDestroy(): void {
-    this.sideMenuService.clearContent();
-    this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
-    // イベントリスナーを削除
-    window.removeEventListener('popstate', this.onPopState.bind(this));
-  }
-
-  // ソート解除処理
-  clearSort() {
-    this.artistTableDesktop?.clearSort();
-    this.artistTableMobile?.clearSort();
-  }
-
-  // ソート処理（再検索）
-  onChangeSort(sortedColumns:{[key:string]: boolean}) {
-    this.currentSort = sortedColumns;
-    this.search();
-  }
-
-  // 検索処理
-  async search(isAdd:boolean = false) {
-    if (this.status !== 'complete')
-      return;
+    // 初回ロード（即座にスピナー表示）
+    this.status = 'load';
+    this.cdr.detectChanges(); // 強制的にChange Detectionを実行
     
-    this.status = isAdd ? 'add' : 'load';
-    if (!isAdd) {
-      this.data = [];
-      this.total = 0;
-      this.cumulTotal = 0;
-      this.currentPage = 0;
-    }
+    // 少し遅延してAPIを呼び出し
+    this.performSearch();
+  }
 
+  // 内部的なAPI呼び出し処理
+  private async performSearch(isAdd: boolean = false) {
     try {
+      if (!isAdd) {
+        this.data = [];
+        this.total = 0;
+        this.cumulTotal = 0;
+        this.currentPage = 0;
+      }
+
       if (!isAdd) {
         const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, 0, this.currentSort).toPromise();
         this.total = response.total;
@@ -218,6 +199,41 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.status = 'complete';
       this.cdr.markForCheck();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.sideMenuService.clearContent();
+    this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
+    // イベントリスナーを削除
+    window.removeEventListener('popstate', this.onPopState.bind(this));
+  }
+
+  // ソート解除処理
+  clearSort() {
+    this.artistTableDesktop?.clearSort(false);
+    this.artistTableMobile?.clearSort(false);
+    this.search();
+  }
+
+  // ソート処理（再検索）
+  onChangeSort(sortedColumns:{[key:string]: boolean}) {
+    this.currentSort = sortedColumns;
+    this.cdr.markForCheck(); // ソート変更前に即座に反映
+    this.search();
+  }
+
+  // 検索処理
+  async search(isAdd:boolean = false) {
+    if (this.status !== 'complete')
+      return;
+    
+    this.status = isAdd ? 'add' : 'load';
+    this.cdr.markForCheck(); // ステータス変更を即座に反映
+    
+    // 少し遅延してAPI呼び出し
+    setTimeout(() => {
+      this.performSearch(isAdd);
+    }, 10);
   }
 
   // 取得データを加工してテーブルにセット

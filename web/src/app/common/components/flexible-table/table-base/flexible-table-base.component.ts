@@ -74,9 +74,11 @@ export class FlexibleTableBaseComponent {
     this.sort();
   }
 
-  clearSort() {
+  clearSort(onEvent:boolean = true) {
     this.sortedColumns = {};
-    this.sort();
+    if (onEvent) {
+      this.sort();
+    }
   }
 
   sort() {

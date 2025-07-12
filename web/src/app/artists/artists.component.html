@@ -32,8 +32,6 @@
             [styles]="desktopStyles"
             [parentComponent]="this"
             [rowHeight]="'280px'"
-            [enableVirtualScroll]="data.length > 30"
-            [virtualRowHeight]="280"
             (sortEvent)="onChangeSort($event)">
           </app-flexible-table-desktop>
         </div>
