@@ -20,18 +20,20 @@ def get_master():
 def search_artists(request:SearchRequest):
     limit = request.limit
     page  = request.page
+    sort  = request.sort
     props = request.props
 
-    res = get_artists_data_and_total(limit, limit*page, props)
+    res = get_artists_data_and_total(limit, limit*page, sort, props)
     return JSONResponse(content=res)
 
 @router.post(f"{BASE_URI}/data")
 def search_artists_diff(request:SearchRequest):
     limit = request.limit
     page  = request.page
+    sort  = request.sort
     props = request.props
 
-    res = get_artists_data(limit, limit*page, props)
+    res = get_artists_data(limit, limit*page, sort, props)
     return JSONResponse(content=res)
 
 @router.get(f"{BASE_URI}/mime/{{path:path}}")

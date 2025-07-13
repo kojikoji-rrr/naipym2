@@ -25,7 +25,7 @@
       <!-- キーワード検索 -->
       <div class="space-y-2">
         <h4 class="text-sm font-medium">キーワード検索</h4>
-        <div class="grid grid-cols-3 gap-y-1 gap-x-2">
+        <div class="grid grid-cols-3 gap-y-1 gap-x-1">
           <!-- メモ -->
           <label class="flex items-center">
             <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByMemo">
@@ -59,6 +59,30 @@
         </div>
         <!-- 入力欄 -->
         <input type='text' class='w-full border rounded p-1 text-xs bg-white resize-none' placeholder='キーワードを入力' [(ngModel)]="props.keyword"/>
+        <!-- 検索オプション -->
+        <div class="grid grid-cols-2 gap-y-1 gap-x-1">
+          <label class="flex items-center">
+            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="0" [(ngModel)]="props.keywordOption">
+            <span class="text-xs">部分一致</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="1" [(ngModel)]="props.keywordOption">
+            <span class="text-xs">完全一致</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="2" [(ngModel)]="props.keywordOption">
+            <span class="text-xs">前方一致</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="3" [(ngModel)]="props.keywordOption">
+            <span class="text-xs">後方一致</span>
+          </label>
+        </div>
+      </div>
+      <!-- ボタン横並び -->
+      <div class="flex gap-2">
+        <button (click)="onClearSearchForm()" class="flex-1 px-3 py-1 text-xs rounded border border-gray-300 bg-white hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150">クリア</button>
+        <button (click)="search()" class="flex-1 px-3 py-1 text-xs rounded border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150">検索</button>
       </div>
       <!-- その他の条件 -->
       <div class="space-y-2">
@@ -80,7 +104,7 @@
               <span class="text-xs">OFF</span>
             </label>
           </div>
-        </div>        
+        </div>
         <!-- ドメイン -->
         <div class="space-y-1">
           <span class="text-xs font-medium">ドメイン</span>
@@ -118,7 +142,7 @@
               <span class="text-xs">DL済</span>
             </label>
             <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isBanned">
+              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isGened">
               <span class="text-xs">生成済</span>
             </label>
           </div>
@@ -127,14 +151,14 @@
         <div class="space-y-1">
           <span class="text-xs font-medium">post数範囲</span>
           <div class="flex items-center gap-1">
-            <input type="number" class="w-16 border rounded p-1 text-xs" placeholder="0" min="0" max="99999" [(ngModel)]="props.postCountMin">
+            <input type="number" class="border rounded p-1 text-xs w-full" placeholder="0" min="0" max="99999" [(ngModel)]="props.postCountMin">
             <span class="text-xs">〜</span>
-            <input type="number" class="w-16 border rounded p-1 text-xs" placeholder="99999" min="0" max="99999" [(ngModel)]="props.postCountMax">
+            <input type="number" class="border rounded p-1 text-xs w-full" placeholder="99999" min="0" max="99999" [(ngModel)]="props.postCountMax">
           </div>
         </div>
       </div>
       <!-- ボタン横並び -->
-      <div class="flex gap-2 pt-2">
+      <div class="flex gap-2">
         <button (click)="onClearSearchForm()" class="flex-1 px-3 py-1 text-xs rounded border border-gray-300 bg-white hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150">クリア</button>
         <button (click)="search()" class="flex-1 px-3 py-1 text-xs rounded border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150">検索</button>
       </div>
@@ -159,7 +183,7 @@
             [thLabels]="labels"
             [hideColumns]="hideColumns"
             [trackByKeys]="trackByKeys"
-            [sortedColumns]="props.sort"
+            [sortedColumns]="sort"
             [styles]="desktopStyles"
             [parentComponent]="this"
             [rowHeight]="'280px'"
@@ -173,7 +197,7 @@
             [thLabels]="labels"
             [hideColumns]="hideColumns"
             [trackByKeys]="trackByKeys"
-            [sortedColumns]="props.sort"
+            [sortedColumns]="sort"
             [styles]="mobileStyles"
             [parentComponent]="this"
             [rowHeight]="'280px'"

@@ -24,15 +24,15 @@ export class ApiService {
         return await firstValueFrom(this.http.get(url.toString(), { responseType: 'json' }));
     }
 
-    public searchArtistDataAndTotal(limit: number = 50, page:number, props: any): Observable<any> {
+    public searchArtistDataAndTotal(limit: number = 50, page:number, sort:{[key:string]:boolean}, props: any): Observable<any> {
         const url = new URL(this.urlResource.ARTIST_DATA_AND_TOTAL, this.API_URL);
-        const body = {limit: limit, page: page, props: props};
+        const body = {limit: limit, page: page, sort: sort, props: props};
         return this.http.post(url.toString(), body);
     }
 
-    public searchArtistData(limit: number = 50, page:number, props: any): Observable<any> {
+    public searchArtistData(limit: number = 50, page:number, sort:{[key:string]:boolean}, props: any): Observable<any> {
         const url = new URL(this.urlResource.ARTIST_DATA, this.API_URL);
-        const body = {limit: limit, page: page, props: props};
+        const body = {limit: limit, page: page, sort: sort, props: props};
         return this.http.post(url.toString(), body);
     }
 

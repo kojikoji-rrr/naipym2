@@ -34,6 +34,8 @@ export class SearchFormProps {
   keywordByModelName:boolean = false;
   // キーワード：絵師ID
   keywordByArtistID:boolean = false;
+  // 検索条件
+  keywordOption:number = 0;
   // 検索キーワード
   keyword:string = "";
   // favorite
@@ -51,8 +53,6 @@ export class SearchFormProps {
   // 投稿数
   postCountMin:number = 0;
   postCountMax:number = 99999;
-  // ソート情報
-  sort: {[key:string]: boolean} = {};
 }
 
 @Component({
@@ -97,6 +97,8 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   cumulTotal:number = 0;
   // 現在のページ番号
   page: number = 0;
+  // ソート情報
+  sort: {[key:string]: boolean} = {};
 
   constructor(
     private sideMenuService: SideMenuService,
@@ -187,7 +189,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     // 非表示カラム
     this.hideColumns = ["tag_id", "artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
     // ソート情報
-    this.props.sort = {'post_count': false};
+    this.sort = {'post_count': false};
   }
 
   ngOnInit() {
@@ -228,11 +230,11 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.total = 0;
           this.cumulTotal = 0;
           this.page = 0;
-          const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, this.page, this.props).toPromise();
+          const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, this.page, this.sort, this.props).toPromise();
           this.total = response.total;
           this.push_data(response.result);
         } else {
-          const response = await this.apiService.searchArtistData(LOAD_LIMIT, this.page, this.props).toPromise();
+          const response = await this.apiService.searchArtistData(LOAD_LIMIT, this.page, this.sort, this.props).toPromise();
           this.push_data(response);
         }
         
@@ -311,13 +313,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ソートクリア
-  onClearSort() {
-    this.artistTableDesktop?.clearSort(false);
-    this.artistTableMobile?.clearSort(false);
-    this.search();
-  }
-
   // ブラウザの戻るボタン処理
   onPopState(event: PopStateEvent) {
     if (this.isOpenImageModal) {
@@ -329,15 +324,23 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Favorite切り替え処理
-  onChangeFavorite(tagId:number, memo?:string, favorite?:boolean) {
-    this.apiService.updateFavorite(tagId, favorite, memo).subscribe(res => {}, err => {console.error('APIでエラーが発生しました:', err)});
+  // ソートクリア
+  onClearSort() {
+    this.artistTableDesktop?.clearSort(false);
+    this.artistTableMobile?.clearSort(false);
+    this.sort = {};
+    this.search();
   }
 
   // ソート切り替え
   onChangeSort(sortedColumns: {[key:string]: boolean}) {
-    this.props.sort = sortedColumns;
+    this.sort = sortedColumns;
     this.search();
+  }
+
+  // Favorite切り替え処理
+  onChangeFavorite(tagId:number, memo?:string, favorite?:boolean) {
+    this.apiService.updateFavorite(tagId, favorite, memo).subscribe(res => {}, err => {console.error('APIでエラーが発生しました:', err)});
   }
 
   // スクロールイベント
