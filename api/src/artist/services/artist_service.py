@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from main import API_RESOURCE_DIR, DB_SERVICE
@@ -32,15 +32,17 @@ def get_artist_master():
     finally:
         con.close()
 
-def get_artists_data_and_total(req:SearchRequest):
+def get_artists_data_and_total(limit:int, offset:int, props:Dict[str,Any]):
     con = DB_SERVICE.open_session()
     query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_detail_query.sql")
+
+    # TODO ここにqueryに対するwhere文を構築、追記
     
     try:
         # 総件数取得
         total = DB_SERVICE.get_query_count_by_text(con, query)
         # 結果取得
-        result = DB_SERVICE.get_query_result_by_text(con, query, req.sort, req.limit, req.offset)
+        result = DB_SERVICE.get_query_result_by_text(con, query, props['sort'], limit, offset)
         # 結果を辞書形式に変換
         return {'total': total, 'result': result}
     except Exception as e:
@@ -48,13 +50,15 @@ def get_artists_data_and_total(req:SearchRequest):
     finally:
         con.close()
 
-def get_artists_data(req:SearchRequest):
+def get_artists_data(limit:int, offset:int, props:Dict[str,Any]):
     con = DB_SERVICE.open_session()
     query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_detail_query.sql")
     
+    # TODO ここにqueryに対するwhere文を構築、追記
+
     try:
         # 結果取得
-        result = DB_SERVICE.get_query_result_by_text(con, query, req.sort, req.limit, req.offset)
+        result = DB_SERVICE.get_query_result_by_text(con, query, props['sort'], limit, offset)
         # 結果を辞書形式に変換
         return result
     except Exception as e:

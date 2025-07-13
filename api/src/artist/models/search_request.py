@@ -1,7 +1,7 @@
-from typing import Dict
+from typing import Any, Dict
 from pydantic import Field, BaseModel
 
 class SearchRequest(BaseModel):
     limit: int = 50
-    offset: int = 0
-    sort: Dict[str, bool] = Field(default_factory=dict)
+    page: int = 0
+    props: Dict[str,Any] = Field(default_factory=dict)

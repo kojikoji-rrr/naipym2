@@ -54,6 +54,8 @@ export class FlexibleTableBaseComponent {
   rowComponents = new Map<any, Map<string, any>>();
   // SafeHtmlキャッシュ
   private safeHtmlCache = new Map<string, SafeHtml>();
+  // Injectorキャッシュ
+  private injectorCache = new Map<string, Injector>();
 
   constructor(
     public injector: Injector,
@@ -131,6 +133,17 @@ export class FlexibleTableBaseComponent {
 
   createInjector(key:string, row:{[key:string]:any}): Injector {
     const trackByValue = this.trackByFn(0, row);
+    const cacheKey = `${trackByValue}_${key}`;
+    
+    // キャッシュされたInjectorがあれば再利用
+    if (this.injectorCache.has(cacheKey)) {
+      const cachedInjector = this.injectorCache.get(cacheKey)!;
+      // データを更新
+      const data = cachedInjector.get('data') as InjectedData;
+      data.row = row; // 最新のrowデータで更新
+      return cachedInjector;
+    }
+    
     const data: InjectedData = {
       parentComponent: this.parentComponent,
       key: key,
@@ -143,9 +156,11 @@ export class FlexibleTableBaseComponent {
       },
       unregister: () => {
         this.rowComponents.get(trackByValue)?.delete(key);
+        this.injectorCache.delete(cacheKey); // キャッシュも削除
       },
     };
-    return Injector.create({
+    
+    const injector = Injector.create({
       providers: [
         {provide:'data', useValue: data},
         {provide:'args', useValue: this.thLabels[key].args},
@@ -153,6 +168,10 @@ export class FlexibleTableBaseComponent {
       ],
       parent: this.injector
     });
+    
+    // Injectorをキャッシュ
+    this.injectorCache.set(cacheKey, injector);
+    return injector;
   }
 
   getSafeHtml(htmlString: string): SafeHtml {
@@ -166,5 +185,11 @@ export class FlexibleTableBaseComponent {
       this.safeHtmlCache.set(cacheKey, this.sanitizer.bypassSecurityTrustHtml(htmlString));
     }
     return this.safeHtmlCache.get(cacheKey)!;
+  }
+
+  // Injectorキャッシュをクリア
+  clearInjectorCache() {
+    this.injectorCache.clear();
+    this.cdr.detectChanges();
   }
 }

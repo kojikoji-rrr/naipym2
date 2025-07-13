@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { SideMenuService } from '../common/services/side-menu.service';
 import { PageHeaderComponent } from '../common/components/page-header/page-header.component';
 import { FlexibleTableDesktopColumn, FlexibleTableDesktopComponent } from '../common/components/flexible-table/table-desktop/flexible-table-desktop.component';
@@ -10,42 +11,73 @@ import { ActivatedRoute } from '@angular/router';
 import { FlexibleTableColumn } from '../common/components/flexible-table/table-base/flexible-table-base.component';
 import { FlexibleTableMobileColumn, FlexibleTableMobileComponent } from '../common/components/flexible-table/table-mobile/flexible-table-mobile.component';
 import { CellCopy, CellFavorite, CellFlag, CellLabel, CellLink, CellTextarea, CellThumb } from '../common/services/flexible-table.service';
+import { FormsModule } from '@angular/forms';
 
 const LOAD_LIMIT = 50;
-const SHRESHOLD = 200; // 下端からの距離（px）
+const THRESHOLD = 0;
 
 export interface ImageModalData {
   mimeType: string,
   url: string
 }
 
+export class SearchFormProps {
+  // キーワード：メモ
+  keywordByMemo:boolean = true;
+  // キーワード：他名称
+  keywordByOtherName:boolean = true;
+  // キーワード：タグ
+  keywordByTagName:boolean = true;
+  // キーワード：絵師名
+  keywordByArtistName:boolean = true;
+  // キーワード：モデル名
+  keywordByModelName:boolean = false;
+  // キーワード：絵師ID
+  keywordByArtistID:boolean = false;
+  // 検索キーワード
+  keyword:string = "";
+  // favorite
+  favorite?:boolean = undefined;
+  // ドメイン
+  domain:string[] = [];
+  // BAN
+  isBanned?:boolean = undefined;
+  // DEL
+  isDeleted?:boolean = undefined;
+  // DL済
+  isDled?:boolean = undefined;
+  // 生成済
+  isGened?:boolean = undefined;
+  // 投稿数
+  postCountMin:number = 0;
+  postCountMax:number = 99999;
+  // ソート情報
+  sort: {[key:string]: boolean} = {};
+}
+
 @Component({
   selector: 'app-artists',
-  imports: [PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, ContentSpinnerComponent, FlexibleModalComponent],
+  imports: [CommonModule, PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, ContentSpinnerComponent, FlexibleModalComponent, FormsModule],
   templateUrl: './artists.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
-  window = window;
+  readonly window = window;  
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
   @ViewChild('artistTableDesktop') artistTableDesktop!: FlexibleTableDesktopComponent;
   @ViewChild('artistTableMobile') artistTableMobile!: FlexibleTableMobileComponent;
-  // 総件数
-  total:number = 0;
-  // 読込済みページ数
-  cumulTotal:number = 0;
-  // ステータス（初期化/差分取得/完了）
-  status: 'load' | 'add' | 'complete' = 'complete';
-  // 現在のページ番号
-  currentPage: number = 0;
   // モーダル展開制御
   isOpenImageModal: boolean = false;
   // サンプルモード
   isSample: boolean = true;
+  // ステータス（初期化/差分取得/完了）
+  status: 'load' | 'add' | 'complete' = 'complete';
   // モーダル画像情報
   modalImageA?:ImageModalData = undefined;
   modalImageB?:ImageModalData = undefined;
+  // 総件数
+  total:number = 0;
   // 表示データ
   data: Array<{[key:string]: any}> = [];
   // trackByキー
@@ -57,10 +89,14 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   mobileStyles: {[key:string]: FlexibleTableMobileColumn} = {};
   // 非表示カラム
   hideColumns: Array<string> = [];
-  // ソート情報
-  currentSort: {[key:string]: boolean} = {};
   // メモリスト
   memoList: string[] = [];
+  // 検索フォーム
+  props:SearchFormProps = new SearchFormProps();
+  // 読込済みページ数
+  cumulTotal:number = 0;
+  // 現在のページ番号
+  page: number = 0;
 
   constructor(
     private sideMenuService: SideMenuService,
@@ -83,6 +119,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       'domain'         :CellLabel('ドメイン'),
       'url'            :CellLink('URL'),
+      'tag_id'         :CellLabel('ID'),
       'tag'            :CellCopy('タグ'),
       'artist_id'      :CellLabel('絵師ID'),
       'artist_name'    :CellCopy('絵師名'),
@@ -146,11 +183,11 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       'img_url'       : {isViewBottom:true}
     };
     // trackByキー
-    this.trackByKeys = ['tag', 'artist_id'];
+    this.trackByKeys = ['tag', 'tag_id', 'artist_id'];
     // 非表示カラム
-    this.hideColumns = ["artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
+    this.hideColumns = ["tag_id", "artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
     // ソート情報
-    this.currentSort = {'post_count': false};
+    this.props.sort = {'post_count': false};
   }
 
   ngOnInit() {
@@ -160,80 +197,55 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('popstate', this.onPopState.bind(this));
   }
 
-  async ngAfterViewInit(): Promise<void> {
-    // ビューの初期化後にテンプレートをサービスにセットする
+  ngAfterViewInit() {
     this.sideMenuService.setContent(this.sideMenuContent);
-    // 初回ロード（即座にスピナー表示）
-    this.status = 'load';
-    this.cdr.detectChanges(); // 強制的にChange Detectionを実行
-    
-    // 少し遅延してAPIを呼び出し
-    this.performSearch();
-  }
-
-  // 内部的なAPI呼び出し処理
-  private async performSearch(isAdd: boolean = false) {
-    try {
-      if (!isAdd) {
-        this.data = [];
-        this.total = 0;
-        this.cumulTotal = 0;
-        this.currentPage = 0;
-      }
-
-      if (!isAdd) {
-        const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, 0, this.currentSort).toPromise();
-        this.total = response.total;
-        this.push_data(response.result);
-        this.cumulTotal = this.data.length;
-      } else {
-        const response = await this.apiService.searchArtistData(LOAD_LIMIT, LOAD_LIMIT*this.currentPage, this.currentSort).toPromise();
-        this.push_data(response);
-        this.cumulTotal = this.data.length;
-      }
-
-    } catch (error) {
-      console.error('API error:', error);
-
-    } finally {
-      this.status = 'complete';
-      this.cdr.markForCheck();
-    }
+    // 次のマイクロタスクで検索実行（スピナー表示を確実にする）
+    this.search();
   }
 
   ngOnDestroy(): void {
     this.sideMenuService.clearContent();
     this.scrollContainerService.removeScrollListener(this.onScrollContainer, this);
-    // イベントリスナーを削除
     window.removeEventListener('popstate', this.onPopState.bind(this));
   }
 
-  // ソート解除処理
-  clearSort() {
-    this.artistTableDesktop?.clearSort(false);
-    this.artistTableMobile?.clearSort(false);
-    this.search();
-  }
-
-  // ソート処理（再検索）
-  onChangeSort(sortedColumns:{[key:string]: boolean}) {
-    this.currentSort = sortedColumns;
-    this.cdr.markForCheck(); // ソート変更前に即座に反映
-    this.search();
-  }
-
-  // 検索処理
-  async search(isAdd:boolean = false) {
+  search(isAdd: boolean = false) {
     if (this.status !== 'complete')
       return;
-    
-    this.status = isAdd ? 'add' : 'load';
-    this.cdr.markForCheck(); // ステータス変更を即座に反映
-    
-    // 少し遅延してAPI呼び出し
-    setTimeout(() => {
-      this.performSearch(isAdd);
-    }, 10);
+
+    if (isAdd) {
+      this.status = 'add';
+      this.cdr.markForCheck();
+    } else {
+      this.status = 'load';
+      this.cdr.detectChanges();
+    }
+
+    Promise.resolve().then(async ()=>{
+      try {
+        if (!isAdd) {
+          this.data = [];
+          this.total = 0;
+          this.cumulTotal = 0;
+          this.page = 0;
+          const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, this.page, this.props).toPromise();
+          this.total = response.total;
+          this.push_data(response.result);
+        } else {
+          const response = await this.apiService.searchArtistData(LOAD_LIMIT, this.page, this.props).toPromise();
+          this.push_data(response);
+        }
+        
+        this.cumulTotal = this.data.length;
+
+      } catch (error) {
+        console.error('API error:', error);
+
+      } finally {
+        this.status = 'complete';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // 取得データを加工してテーブルにセット
@@ -294,55 +306,16 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       return processedItem;
     });
     
-    this.data = [...this.data, ...processedData];
+    // 配列参照を保持しながら要素を追加（チラつき防止）
+    processedData.forEach(item => this.data.push(item));
     this.cdr.markForCheck();
   }
 
-  // スクロールイベント
-  onScrollContainer() {
-    const element = this.scrollContainerService.getScrollContainerElement();
-    if (this.status !== 'complete' || !element) return;
-
-    const position = element.scrollTop + element.clientHeight;
-    const height = element.scrollHeight;
-
-    if (position >= height - SHRESHOLD) {
-      if (this.cumulTotal < this.total) {
-        this.currentPage++;
-        this.search(true);
-      }
-    }
-  }
-
-  // 画像クリック処理
-  showImageModal(img_path:string, gen_path:string) {
-    this.apiService.getImageType(this.isSample ? "sample" : img_path).subscribe((typeA: string) => {
-      if (typeA != 'none') {
-        this.modalImageA = {
-          mimeType: typeA,
-          url: this.getImageUrl(img_path, false)
-        }
-      }
-    });
-    this.apiService.getImageType(this.isSample ? "sample" : gen_path).subscribe((typeB: string) => {
-      if (typeB != 'none') {
-        this.modalImageB = {
-          mimeType: typeB,
-          url: this.getImageUrl(gen_path, false)
-        }
-      }
-    });
-
-    // モーダル表示前に履歴に状態を追加
-    history.pushState({ modal: true }, '', '');
-    this.isOpenImageModal = true;
-  }
-
-  // モーダルを閉じる処理
-  closeImageModal() {
-    this.modalImageA = undefined;
-    this.modalImageB = undefined;
-    this.isOpenImageModal = false;
+  // ソートクリア
+  onClearSort() {
+    this.artistTableDesktop?.clearSort(false);
+    this.artistTableMobile?.clearSort(false);
+    this.search();
   }
 
   // ブラウザの戻るボタン処理
@@ -359,6 +332,115 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Favorite切り替え処理
   onChangeFavorite(tagId:number, memo?:string, favorite?:boolean) {
     this.apiService.updateFavorite(tagId, favorite, memo).subscribe(res => {}, err => {console.error('APIでエラーが発生しました:', err)});
+  }
+
+  // ソート切り替え
+  onChangeSort(sortedColumns: {[key:string]: boolean}) {
+    this.props.sort = sortedColumns;
+    this.search();
+  }
+
+  // スクロールイベント
+  onScrollContainer() {
+    const element = this.scrollContainerService.getScrollContainerElement();
+    if (this.status !== 'complete' || !element) return;
+
+    const position = element.scrollTop + element.clientHeight;
+    const height = element.scrollHeight;
+
+    if (position >= height - THRESHOLD) {
+      if (this.cumulTotal < this.total) {
+        this.page++;
+        this.search(true);
+      }
+    }
+  }
+
+  // 検索：ドメイン切り替え
+  onChangeSearchDomain(event:Event) {
+    const target = event.target as HTMLInputElement;
+
+    if (target.checked) {
+      if (!this.props.domain.includes(target.value)) {
+        this.props.domain.push(target.value);
+      }
+    } else {
+      var index = this.props.domain.indexOf(target.value, 0);
+      if (index > -1) {
+        this.props.domain.splice(index, 1);
+      }
+    }
+  }
+
+  // 検索：クリア
+  onClearSearchForm() {
+    this.props = new SearchFormProps();
+  }
+  
+  // 画像クリック処理
+  showImageModal(img_path:string, gen_path:string) {
+    this.apiService.getImageType(this.isSample ? "sample" : img_path).subscribe((typeA: string) => {
+      if (typeA != 'none') {
+        this.modalImageA = {
+          mimeType: typeA,
+          url: this.getImageUrl(img_path, false)
+        }
+      }
+      this.cdr.detectChanges(); // 非同期処理内でChange Detection
+    });
+    this.apiService.getImageType(this.isSample ? "sample" : gen_path).subscribe((typeB: string) => {
+      if (typeB != 'none') {
+        this.modalImageB = {
+          mimeType: typeB,
+          url: this.getImageUrl(gen_path, false)
+        }
+      }
+      this.cdr.detectChanges(); // 非同期処理内でChange Detection
+    });
+
+    // モーダル表示前に履歴に状態を追加
+    history.pushState({ modal: true }, '', '');
+    this.isOpenImageModal = true;
+    this.cdr.detectChanges();
+  }
+
+  // モーダルを閉じる処理
+  closeImageModal() {
+    this.modalImageA = undefined;
+    this.modalImageB = undefined;
+    this.isOpenImageModal = false;
+    this.cdr.detectChanges();
+  }
+
+  // サンプル表示トグル
+  toggleSampleImage() {
+    this.isSample = !this.isSample;
+    
+    // データのURLを更新
+    this.data.forEach((data) => {
+      data['gen_url'] = this.getImageUrl(data['gen_path'], true);
+      data['img_url'] = this.getImageUrl(data['img_path'], true);
+    });
+    // Injectorキャッシュをクリア（動的コンポーネントの更新を強制）
+    this.artistTableDesktop?.clearInjectorCache?.();
+    this.artistTableMobile?.clearInjectorCache?.();
+    this.cdr.detectChanges();
+  }
+
+  // カラム表示切替
+  toggleColumnVisibility(columnKey: string) {
+    const index = this.hideColumns.indexOf(columnKey);
+    if (index > -1) {
+      this.hideColumns.splice(index, 1);
+    } else {
+      this.hideColumns.push(columnKey);
+    }
+    this.cdr.detectChanges();
+  }
+
+  // 非表示切替可能なカラム一覧
+  getHideableColumns(): string[] {
+    return Object.keys(this.labels);
   }
 
   // 画像URLの生成

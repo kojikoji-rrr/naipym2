@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from fastapi import APIRouter, Request, Response
 from fastapi import Query as QueryParam
 from fastapi.responses import JSONResponse
@@ -15,28 +16,22 @@ def get_master():
     res = get_artist_master()
     return JSONResponse(content=res)
 
-@router.get(f"{BASE_URI}/data_and_total")
-def search_artists(limit: int = 50, offset: int = 0, sort: str = QueryParam("{}")):
-    try:
-        sort_dict = json.loads(sort)
-    except json.JSONDecodeError:
-        sort_dict = {}
-   
-    req = SearchRequest(limit=limit, offset=offset, sort=sort_dict)
-    res = get_artists_data_and_total(req)
-    
+@router.post(f"{BASE_URI}/data_and_total")
+def search_artists(request:SearchRequest):
+    limit = request.limit
+    page  = request.page
+    props = request.props
+
+    res = get_artists_data_and_total(limit, limit*page, props)
     return JSONResponse(content=res)
 
-@router.get(f"{BASE_URI}/data")
-def search_artists_diff(limit: int = 50, offset: int = 0, sort: str = QueryParam("{}")):
-    try:
-        sort_dict = json.loads(sort)
-    except json.JSONDecodeError:
-        sort_dict = {}
-   
-    req = SearchRequest(limit=limit, offset=offset, sort=sort_dict)
-    res = get_artists_data(req)
-    
+@router.post(f"{BASE_URI}/data")
+def search_artists_diff(request:SearchRequest):
+    limit = request.limit
+    page  = request.page
+    props = request.props
+
+    res = get_artists_data(limit, limit*page, props)
     return JSONResponse(content=res)
 
 @router.get(f"{BASE_URI}/mime/{{path:path}}")

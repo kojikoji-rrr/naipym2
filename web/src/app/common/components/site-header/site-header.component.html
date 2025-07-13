@@ -27,7 +27,7 @@
 </div>
 <!-- サイドメニュー -->
 <div class="fixed inset-0 z-50" [hidden]="!isOpenSideMenu" (click)="isOpenSideMenu = !isOpenSideMenu"></div>
-<div class="fixed top-0 right-0 pt-10 w-56 h-screen bg-white shadow-lg z-[99] transition-transform duration-300 shadow-[0_0_10px_rgba(0,0,0,0.3)] flex flex-col" [ngClass]="{'translate-x-full': !isOpenSideMenu, 'translate-x-0': isOpenSideMenu}">
+<div class="fixed top-0 right-0 pt-10 w-58 h-screen bg-white shadow-lg z-[99] transition-transform duration-300 shadow-[0_0_10px_rgba(0,0,0,0.3)] flex flex-col" [ngClass]="{'translate-x-full': !isOpenSideMenu, 'translate-x-0': isOpenSideMenu}">
   <div class="overflow-y-auto flex-grow h-full" id="side-menu-container">
     <ng-content></ng-content>
   </div>
