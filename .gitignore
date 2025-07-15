@@ -6,3 +6,4 @@ web/package-lock.json
 *__pycache__*
 node_modules/
 api/res/cookies_danbooru.donmai.us.pki
+api/res/cookies_gelbooru.com.pki

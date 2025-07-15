@@ -15,9 +15,7 @@
   <app-content-spinner [showSpinner]="isLoading" [showContentAlways]="true">
     <div class="space-y-4">
       <!-- エラー表示 -->
-      @if (result && result.error) {
-        <div class="p-3 bg-red-100 text-red-700 rounded border border-red-300">{{result.code}} : {{result.error}}</div>
-      }
+      <app-notification #notice></app-notification>
       <!-- HTMLレンダリング -->
       @if (result && !result.error) {
         @if (result.data && result.data.html) {

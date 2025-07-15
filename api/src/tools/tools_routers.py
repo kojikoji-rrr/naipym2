@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from util import get_file_info
 from src.common.services.webdriver_service import create_webdriver, get
-from src.common.services.danbooru_service import get_post as danbooru_get_post
+from src.common.services.danbooru_service import get_post as danbooru_get_post, search_artist as danbooru_search_artist
 from src.common.services.gelbooru_service import get_post as gelbooru_get_post
 from config import API_BASE, DB_BACKUP_DIR, RESOURCES_DIR
 
@@ -16,15 +16,13 @@ router = APIRouter()
 @router.get(f"{BASE_URI}/fetch")
 def fetch(target:str):
     driver = None
-    driver = create_webdriver(False, False)
+    driver = create_webdriver(False, True)
 
     try:
         if 'danbooru.donmai.us/posts' in target:
-            soup, post_data = danbooru_get_post(driver, target)
-            html_content = driver.page_source
+            soup, html_content, post_data = danbooru_get_post(driver, target)
         elif 'https://gelbooru.com/index.php?page=post' in target:
-            soup, post_data = gelbooru_get_post(driver, target)
-            html_content = driver.page_source
+            soup, html_content, post_data = gelbooru_get_post(driver, target)
         else:
             soup = get(driver, target)
             post_data = None
@@ -51,7 +49,30 @@ def fetch(target:str):
 
 @router.get(f"{BASE_URI}/d_search_artist")
 def search_danbooru_by_artist(target:str, max_page:int):
-    pass
+    driver = None
+    driver = create_webdriver(False, True)
+
+    try:
+        soups, html_contents, artists = danbooru_search_artist(driver, target, max_page)
+
+        return JSONResponse(content={
+            'code': 200,
+            'data': {
+                'html': html_contents,
+                'json': artists
+            }
+        })
+    
+    except Exception as e:
+        error_code = getattr(e, 'code', 500)
+        error_message = getattr(e, 'message', str(e))
+        return JSONResponse(content={
+            'code': error_code, 
+            'error': error_message
+        })
+    
+    finally:
+        driver.quit()
 
 @router.get(f"{BASE_URI}/backup")
 def get_backup_list():
@@ -87,7 +108,6 @@ def create_backup():
 
     except Exception as e:
         return {"code": 500, "error": e}
-
 
 @router.delete(f"{BASE_URI}/backup/{{filename}}")
 def delete_backup(filename: str):

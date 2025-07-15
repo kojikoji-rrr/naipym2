@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewChecked, Component, EventEmitter } from '@angular/core';
+import { AfterViewChecked, Component, EventEmitter, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ContentSpinnerComponent } from '../../../common/components/content-spinner/content-spinner.component';
 import { PrettyHtmlPipe } from '../../../common/pipes/pretty-html/pretty-html.pipe';
@@ -8,22 +8,24 @@ import { ApiService } from '../../../common/services/api.service';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markup';
+import { NotificationComponent } from '../../../common/components/notification/notification.component';
 
 export interface SearchResult {
   code: number;
   error?:string;
   data?: {
-    html: string,
+    html: string[],
     json: string
   };
 }
 
 @Component({
   selector: 'app-tools-page2',
-  imports: [CommonModule, FormsModule, ContentSpinnerComponent, PrettyHtmlPipe, NumberOnlyDirective],
+  imports: [CommonModule, FormsModule, ContentSpinnerComponent, PrettyHtmlPipe, NumberOnlyDirective, NotificationComponent],
   templateUrl: './tools-page2.component.html'
 })
 export class ToolsPage2Component implements AfterViewChecked {
+  @ViewChild("notice") noticeComponent!: NotificationComponent;
   strInput:string = "";
   pageInput:string = "1";
   isLoading:boolean = false;
@@ -40,17 +42,15 @@ export class ToolsPage2Component implements AfterViewChecked {
     
     this.isLoading = true;
     this.result = undefined;
+    this.noticeComponent.clear();
     
     this.apiService.searchDanbooruByArtist(this.strInput, this.pageInput).subscribe({
       next: (response: SearchResult) => {
-        this.result = response;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.result = {
-          code: error.status,
-          error: error.message
-        };
+        if (response.code === 200) {
+          this.result = response;
+        } else {
+          this.noticeComponent.setNoticeError(response.code, response.error!);
+        }
         this.isLoading = false;
       }
     });

@@ -6,10 +6,11 @@ from src.common.services.webdriver_service import get
 
 def get_post(driver, url):
     soup = get(driver,url)
+    html_content = driver.page_source
 
     stats = _get_statistics(soup)
     path = str(urlparse(url).scheme) + "://" + str(stats.get('source'))
-    return soup, (
+    return soup, html_content, (
             {'id': parse_qs(urlparse(url).query).get("id",[""])[0]} |
             {'image_url': _get_original_url(soup)} |
             _get_info(soup,['width','height','rating','score']) |

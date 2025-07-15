@@ -8,6 +8,8 @@ from src.common.services.webdriver_service import get
 
 # Danbooruでアーティストを検索する
 def search_artist(driver, artist, max_pages=1):
+    soups = []
+    html_contents = []
     results = []
     retry_delay = 1  # 初期リトライ遅延（秒）
     
@@ -23,17 +25,18 @@ def search_artist(driver, artist, max_pages=1):
                     time.sleep(cooldown)
                 
                 soup = get(driver, "https://danbooru.donmai.us/artists?search%5Bany_name_matches%5D={?}&page={?}",[artist, str(page_num)])
+                html_contents.append(driver.page_source)
                 
                 if soup:
                     table_body = soup.select_one("table tbody")
                     if not table_body:
                         # テーブルが見つからない場合、ページが存在しないとみなして終了
-                        return results
+                        return soups, html_contents, results
                     
                     rows = table_body.select("tr")
                     if not rows:
                         # 行が存在しない場合、ページが存在しないとみなして終了
-                        return results
+                        return soups, html_contents, results
                     
                     for row in rows:
                         cols = row.select("td")
@@ -45,6 +48,8 @@ def search_artist(driver, artist, max_pages=1):
                                 _get_search_flags(cols[2]) |
                                 {'updated_at': _get_search_updated(cols[3])}
                             ))
+                    
+                    soups.append(soup)
                     break  # 成功したらリトライループを抜ける
                 else:
                     raise Exception("ページの取得に失敗しました")
@@ -65,13 +70,14 @@ def search_artist(driver, artist, max_pages=1):
                     retry_delay = min(retry_delay * 2, 10)  # 最大10秒
                     time.sleep(retry_delay + random.uniform(0, 1))
                     
-    return results
+    return soups, html_contents, results
 
 def get_post(driver, url):
     soup = get(driver,url)
+    html_content = driver.page_source
 
     tags = _get_tags(soup,['0','1','2','3','4','5'])
-    return soup, (
+    return soup, html_content, (
             {'id': urlparse(url).path.strip("/").split("/")[-1]} |
             {'image_url': _get_original_url(soup)} |
             _get_info(soup,['width','height','rating','score','source']) |

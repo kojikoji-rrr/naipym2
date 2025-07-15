@@ -1,0 +1,8 @@
+<div class="border rounded-lg" [ngClass]="panelClass" [ngStyle]="panelStyle">
+  <div class="p-2 bg-gray-50 border-b">
+    <h4 class="font-medium text-gray-900">{{title}}</h4>
+  </div>
+  <div class="bg-white text-sm" [ngClass]="contentClass" [ngStyle]="contentStyle">
+    <ng-content></ng-content>
+  </div>
+</div>

@@ -33,11 +33,14 @@ def get(driver, search_url:str, args: List[str]=[]) -> BeautifulSoup:
     for s in args:
         search_url = search_url.replace("{?}", quote(str(s)), 1)
     
-    # ドメインのクッキーを取得し設定
+    # まずドメインにアクセス
     domain = urlparse(search_url).netloc
+    driver.get(search_url)
+    
+    # クッキーを読み込み
     _load_cookies(driver, domain)
     
-    # fetch実行
+    # クッキーを読み込んだ後、ページを再読み込み
     driver.get(search_url)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     
@@ -80,7 +83,6 @@ def save_image(file_path: str, data):
     return True
 
 def _detect_cloudflare_challenge(soup):
-    """Cloudflareチャレンジ画面を検知"""
     page_text = soup.get_text().lower()
     
     # 強い検知条件（確実にChallenge画面）
@@ -122,19 +124,10 @@ def _detect_cloudflare_challenge(soup):
     return False
 
 def _wait_for_manual_intervention(driver, timeout=300):
+    auto_reloaded = True
+
     """手動介入を待機（デフォルト5分）"""
     print("Cloudflareチャレンジを検知しました。")
-    
-    # 特定のメッセージを検知した場合、3回まで画面更新を試行
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    if soup.find('p', string='以下のアクションを完了して、あなたが人間であることを確認してください。'):
-        for i in range(3):
-            print(f"画面更新試行 {i+1}/3")
-            time.sleep(2)
-            driver.refresh()
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            if not _detect_cloudflare_challenge(soup): return True
-        print("3回の更新でも解決されませんでした。手動解決を待機します。")
     
     # 手動解決を待機
     print("手動でチャレンジを解決してください。")
@@ -147,6 +140,18 @@ def _wait_for_manual_intervention(driver, timeout=300):
             return True
         # Cloudflareページから脱出したか確認
         soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+        if auto_reloaded and soup.find('p', string='以下のアクションを完了して、あなたが人間であることを確認してください。'):
+            for i in range(3):
+                print(f"画面更新試行 {i+1}/3")
+                time.sleep(2)
+                driver.refresh()
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                if not _detect_cloudflare_challenge(soup): return True
+            
+            auto_reloaded = False
+            print("3回の更新でも解決されませんでした。手動解決を待機します。")
+        
         if not _detect_cloudflare_challenge(soup):
             print("Cloudflareチャレンジを通過しました。")
             return True
