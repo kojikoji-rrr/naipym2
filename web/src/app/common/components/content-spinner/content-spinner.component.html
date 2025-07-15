@@ -1,8 +1,10 @@
-@if (showSpinner) {
-  <div class="flex justify-center items-center" [style.padding-top]="padding" [style.padding-bottom]="padding">
-    <div class="animate-spin rounded-full border-t-2 border-b-2 border-blue-500" [style.width]="size" [style.height]="size"></div>
-  </div>
-}
-@if (showContentAlways || !showSpinner) {
-  <ng-content></ng-content>
-}
+<div class="relative" [style.min-height]="size">
+  @if (showSpinner) {
+    <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10" [style.padding-top]="padding" [style.padding-bottom]="padding">
+      <app-spinner [size]="size"></app-spinner>
+    </div>
+  }
+  @if (showContentAlways || !showSpinner) {
+    <ng-content></ng-content>
+  }
+</div>

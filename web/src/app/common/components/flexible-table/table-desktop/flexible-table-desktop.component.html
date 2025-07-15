@@ -31,7 +31,7 @@
               [ngClass]="styles[key] && styles[key].rowClass"
               [ngStyle]="styles[key] && styles[key].rowStyle"
               class="p-0">
-              @if (row[key] !== undefined) {
+              @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                 @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                   <div class="w-full h-full">
                     <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>

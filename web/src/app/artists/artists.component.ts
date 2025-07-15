@@ -12,6 +12,7 @@ import { FlexibleTableColumn } from '../common/components/flexible-table/table-b
 import { FlexibleTableMobileColumn, FlexibleTableMobileComponent } from '../common/components/flexible-table/table-mobile/flexible-table-mobile.component';
 import { CellCopy, CellFavorite, CellFlag, CellLabel, CellLink, CellTextarea, CellThumb } from '../common/services/flexible-table.service';
 import { FormsModule } from '@angular/forms';
+import { SpinnerComponent } from '../common/components/spinner/spinner.component';
 
 const LOAD_LIMIT = 50;
 const THRESHOLD = 0;
@@ -57,7 +58,7 @@ export class SearchFormProps {
 
 @Component({
   selector: 'app-artists',
-  imports: [CommonModule, PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, ContentSpinnerComponent, FlexibleModalComponent, FormsModule],
+  imports: [CommonModule, PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, SpinnerComponent, ContentSpinnerComponent, FlexibleModalComponent, FormsModule],
   templateUrl: './artists.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -232,10 +233,12 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.page = 0;
           const response = await this.apiService.searchArtistDataAndTotal(LOAD_LIMIT, this.page, this.sort, this.props).toPromise();
           this.total = response.total;
-          this.push_data(response.result);
+          this.transformData(response.result).forEach(item => this.data.push(item));
+          this.cdr.markForCheck();
+
         } else {
           const response = await this.apiService.searchArtistData(LOAD_LIMIT, this.page, this.sort, this.props).toPromise();
-          this.push_data(response);
+          this.transformData(response).forEach(item => this.data.push(item));
         }
         
         this.cumulTotal = this.data.length;
@@ -250,9 +253,9 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // 取得データを加工してテーブルにセット
-  push_data(response: Array<{ [key: string]: any }>): void {
-    const processedData = response.map((item, index) => {
+  // 取得データを加工
+  transformData(response:[{[key:string]:any}]) {
+    return response.map((item, index) => {
       const processedItem = { ...item };
       
       // 事前計算済みIDを追加（trackBy最適化用）
@@ -307,10 +310,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return processedItem;
     });
-    
-    // 配列参照を保持しながら要素を追加（チラつき防止）
-    processedData.forEach(item => this.data.push(item));
-    this.cdr.markForCheck();
   }
 
   // ブラウザの戻るボタン処理

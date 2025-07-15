@@ -4,7 +4,7 @@ import random
 from typing import Dict, Any
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-from webdriver_service import get
+from src.common.services.webdriver_service import get
 
 # Danbooruでアーティストを検索する
 def search_artist(driver, artist, max_pages=1):
@@ -67,11 +67,11 @@ def search_artist(driver, artist, max_pages=1):
                     
     return results
 
-def get_post(driver, url) -> Dict[str, Any]:
+def get_post(driver, url):
     soup = get(driver,url)
 
     tags = _get_tags(soup,['0','1','2','3','4','5'])
-    return (
+    return soup, (
             {'id': urlparse(url).path.strip("/").split("/")[-1]} |
             {'image_url': _get_original_url(soup)} |
             _get_info(soup,['width','height','rating','score','source']) |

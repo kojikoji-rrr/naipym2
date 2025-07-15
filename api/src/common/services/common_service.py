@@ -1,5 +1,4 @@
-from sqlalchemy import Column
-from main import DB_SERVICE
+from config import DB_SERVICE
 from src.common.models.sqlalchemy.favorite import Favorite
 
 # favoriteテーブル更新

@@ -8,16 +8,18 @@ import { Observable, firstValueFrom } from 'rxjs';
 export class ApiService {
     public API_URL = location.hostname === 'localhost' ? 'http://localhost:8080' : 'http://192.168.10.200:8080';
     public API_BASE = 'rest/api';
-
     public urlResource = {
         ARTIST_MASTER: `${this.API_BASE}/artist/master`,
         ARTIST_DATA_AND_TOTAL: `${this.API_BASE}/artist/data_and_total`,
         ARTIST_DATA: `${this.API_BASE}/artist/data`,
         ARTIST_TYPE: `${this.API_BASE}/artist/mime`,
-        FAVORITE: `${this.API_BASE}/artist/favorite`
+        TOOL_CURL: `${this.API_BASE}/tools/fetch`,
+        TOOL_D_SEARCH_ARTIST: `${this.API_BASE}/tools/d_search_artist`,
+        TOOL_BAK_LIST: `${this.API_BASE}/tools/backup`,
+        FAVORITE: `${this.API_BASE}/favorite`,
     }
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) {}
 
     public async getArtistMaster(): Promise<any> {
         const url = new URL(this.urlResource.ARTIST_MASTER, this.API_URL);
@@ -45,5 +47,33 @@ export class ApiService {
         const url = new URL(this.urlResource.FAVORITE, this.API_URL);
         const body = { tagId: tagId, favorite: favorite, memo: memo };
         return this.http.post(url.toString(), body);
+    }
+
+    public fetch(target:string): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_CURL, this.API_URL);
+        url.searchParams.append('target', target);
+        return this.http.get(url.toString());
+    }
+
+    public searchDanbooruByArtist(target:string, maxPage:string): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_D_SEARCH_ARTIST, this.API_URL);
+        url.searchParams.append('target', target);
+        url.searchParams.append('max_page', maxPage);
+        return this.http.get(url.toString());
+    }
+
+    public getDBBackupList(): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_BAK_LIST, this.API_URL);
+        return this.http.get(url.toString());
+    }
+
+    public createDBBackup(): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_BAK_LIST, this.API_URL);
+        return this.http.post(url.toString(), {});
+    }
+    
+    public deleteDBBackup(filename: string): Observable<any> {
+        const url = new URL(`${this.urlResource.TOOL_BAK_LIST}/${filename}`, this.API_URL);
+        return this.http.delete(url.toString());
     }
 }

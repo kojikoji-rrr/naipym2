@@ -24,6 +24,7 @@
     "@angular/ssr": "^19.2.10",
     "audit": "^0.0.6",
     "express": "^4.18.2",
+    "prettier": "^3.6.2",
     "prismjs": "^1.30.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

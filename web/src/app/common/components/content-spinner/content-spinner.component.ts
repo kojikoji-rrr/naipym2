@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { SpinnerComponent } from '../spinner/spinner.component';
 
 @Component({
   selector: 'app-content-spinner',
-  imports: [CommonModule],
-  templateUrl: './content-spinner.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [CommonModule, SpinnerComponent],
+  templateUrl: './content-spinner.component.html'
 })
 export class ContentSpinnerComponent {
   @Input() showSpinner:boolean = false;

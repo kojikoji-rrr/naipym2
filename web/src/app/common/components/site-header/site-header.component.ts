@@ -23,7 +23,7 @@ export class SiteHeaderComponent {
   ) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.activeRoute = event.urlAfterRedirects;
+        this.activeRoute = `/${event.urlAfterRedirects.split('/')[1]}`;
         this.cdr.detectChanges();
       }
     });

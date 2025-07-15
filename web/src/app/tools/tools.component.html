@@ -1,0 +1,26 @@
+<div class="h-full w-full">
+  <!-- サイドメニュー -->
+  <ng-template #sideMenuContent>
+    <div class="p-4 space-y-4">
+      <h3 class="font-bold text-md mb-2">ツールページメニュー</h3>
+      <ul class="space-y-2">
+        特になし
+      </ul>
+    </div>
+  </ng-template>
+  <!-- ページヘッダー -->
+  <app-page-header [title]="'ツール一覧'"></app-page-header>
+  <!-- タブコンテンツ -->
+  <div class="pb-16">
+    <app-tab-layout
+      [tabs]="[
+        {routerLink: '/tools/p1', label: 'URL取得確認'},
+        {routerLink: '/tools/p2', label: '絵師検索確認'},
+        {routerLink: '/tools/p3', label: 'タグ検索確認'},
+        {routerLink: '/tools/p4', label: 'SQL実行'},
+        {routerLink: '/tools/p5', label: 'DBバックアップ'}
+      ]">
+      <router-outlet></router-outlet>
+    </app-tab-layout>
+  </div>
+</div>

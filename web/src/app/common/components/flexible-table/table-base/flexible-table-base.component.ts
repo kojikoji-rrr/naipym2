@@ -44,6 +44,8 @@ export class FlexibleTableBaseComponent {
   @Input() hideColumns: Array<string> = [];
   // キー項目
   @Input() trackByKeys: Array<string> = [];
+  // データが無くても表示する項目
+  @Input() forcefulColumns: Array<string> = [];
   // ソート初期値
   @Input() sortedColumns: {[key:string]: boolean} = {}
   // 親コンポーネント参照

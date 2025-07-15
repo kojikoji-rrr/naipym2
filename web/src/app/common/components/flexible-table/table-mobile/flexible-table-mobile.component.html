@@ -18,7 +18,7 @@
                     <span class="align-middle ml-1"> @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼} </span>
                   </span>
                   <div class="w-full h-full text-gray-900" [ngClass]="(styles[key] && styles[key].rowClass) || ''" [ngStyle]="(styles[key] && styles[key].rowStyles) || undefined">
-                    @if (row[key] !== undefined) {
+                    @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                       @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                         <div class="w-full h-full">
                           <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
@@ -40,7 +40,7 @@
           <div class="flex">
             @for(key of getMiddleColumns(); track key; let isLast = $last) {
               <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
-                @if(row[key] !== undefined) {
+                @if(forcefulColumns.includes(key) || row[key] !== undefined) {
                   @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                     <div class="w-full">
                       <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
@@ -58,7 +58,7 @@
           <div class="flex" [style]="{height: rowHeight}">
             @for (key of getBottomColumns(); track key; let isLast = $last) {
               <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
-                @if (row[key] !== undefined) {
+                @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                   @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                     <div class="w-full h-full">
                       <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>

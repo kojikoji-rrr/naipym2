@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from main import API_RESOURCE_DIR, DB_SERVICE
-from src.artist.models.search_request import SearchRequest
+from config import API_RESOURCE_DIR, DB_SERVICE
+from src.artists.models.search_request import SearchRequest
 from PIL import Image
 import cv2
 import base64

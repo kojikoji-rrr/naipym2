@@ -5,6 +5,7 @@ import { CellFavoriteHandler, CellFavoriteComponent } from "../components/flexib
 import { CellLinkComponent } from "../components/flexible-table/cell-components/cell-link/cell-link.component";
 import { CellCopyComponent } from "../components/flexible-table/cell-components/cell-copy/cell-copy.component";
 import { CellFlagComponent } from "../components/flexible-table/cell-components/cell-flag/cell-flag.component";
+import { CellDelButtonHandler, CellDelButtonComponent } from "../components/flexible-table/cell-components/cell-del-button/cell-del-button.component";
 
 export function CellLabel(label: string): FlexibleTableColumn {
     return {
@@ -54,6 +55,14 @@ export function CellThumb(label: string, handler: CellThumbHandler): FlexibleTab
     return {
         label: label,
         component: CellThumbComponent,
+        handler: convertHandlerList(handler)
+    };
+}
+
+export function CellDelBtn(label: string, handler: CellDelButtonHandler): FlexibleTableColumn {
+    return {
+        label: label,
+        component: CellDelButtonComponent,
         handler: convertHandlerList(handler)
     };
 }

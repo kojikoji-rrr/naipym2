@@ -4,3 +4,5 @@ web/package-lock.json
 */__pycache__/*
 .resources/
 *__pycache__*
+node_modules/
+api/res/cookies_danbooru.donmai.us.pki

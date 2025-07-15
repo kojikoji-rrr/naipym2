@@ -2,14 +2,14 @@ import re
 from typing import Dict, Any
 from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
-from webdriver_service import get
+from src.common.services.webdriver_service import get
 
 def get_post(driver, url):
     soup = get(driver,url)
 
     stats = _get_statistics(soup)
     path = str(urlparse(url).scheme) + "://" + str(stats.get('source'))
-    return (
+    return soup, (
             {'id': parse_qs(urlparse(url).query).get("id",[""])[0]} |
             {'image_url': _get_original_url(soup)} |
             _get_info(soup,['width','height','rating','score']) |
