@@ -1,58 +1,59 @@
+<!-- サイドメニュー -->
+<ng-template #sideMenuContent>
+  <div class="p-4">
+    <h3 class="label-sidemenu-title">ツールメニュー</h3>
+    <ul class="space-y-2">
+      特になし１
+    </ul>
+  </div>
+</ng-template>
+
+<!-- メインコンテンツ -->
 <div class="h-full w-full">
-  <!-- URL入力フォーム -->
-  <div>
-    <div class="mb-4 flex items-center justify-between gap-2">
-      <input type="url" placeholder="danbooru.domain.us / gelbooru.com のポストURLを入力" class="w-full border rounded p-1 bg-white resize-none" [(ngModel)]="urlInput" />
-      <button
-        class="w-16 px-3 py-1 rounded border text-white"
-        [disabled]="!urlInput || isLoading"
-        [ngClass]="!urlInput || isLoading ? 'bg-gray-400': 'transition-colors border-blue-500 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 duration-150'"
-        (click)="search()">
-        確認
-      </button>
+  <!-- 入力フォーム -->
+  <div class="mb-4 flex items-end justify-between gap-2">
+    <app-label-one-content [label]="'キーワード'" [isLabelTop]="true" [class]="'flex-1'">
+      <input type="url" class="input-text resize-none" [(ngModel)]="urlInput" placeholder="danbooru.domain.us / gelbooru.com のポストURLを入力" />
+    </app-label-one-content>
+    <div class="my-2 w-16 flex justify-center">
+      <button class="button-primary button-medium mb-[1px]" [disabled]="!urlInput || isLoading" (click)="search()">確認</button>
     </div>
   </div>
+  <!-- 結果欄 -->
   <app-content-spinner [showSpinner]="isLoading" [showContentAlways]="true">
-    <div class="space-y-4">
-      <!-- エラー表示 -->
-      <app-notification #notice></app-notification>
-      <!-- HTMLレンダリング -->
-      @if (result && !result.error) {
-        @if (result.data && result.data.html) {
-          <div class="border rounded-lg">
-            <div class="p-2 bg-gray-50 border-b">
-              <h4 class="font-medium text-gray-900">htmlレンダリング</h4>
-            </div>
-            <div class="bg-white overflow-hidden h-[600px] relative">
-              <div class="h-full w-full" style="overflow: auto;">
-                <iframe [srcdoc]="result.data.html" style="width: 100%; height: 100%; border: none;" sandbox="allow-same-origin"></iframe>
-              </div>
-            </div>
-          </div>
-        }
-        <!-- HTML表示 -->
-        @if (result.data && result.data.html) {
-          <div class="border rounded-lg">
-            <div class="p-2 bg-gray-50 border-b">
-              <h4 class="font-medium text-gray-900">htmlコード</h4>
-            </div>
-            <div class="p-2 bg-white text-sm overflow-auto max-h-[600px]">
-              <pre class="!bg-transparent !m-0 !p-0"><code class="language-markup">{{result.data.html | prettyHtml | async}}</code></pre>
-            </div>
-          </div>
-        }
-        <!-- JSON結果 -->
-        @if (result.data && result.data.json) {
-          <div class="border rounded-lg">
-            <div class="p-2 bg-gray-50 border-b">
-              <h4 class="font-medium text-gray-900">加工後json</h4>
-            </div>
-            <div class="p-2 bg-white text-sm overflow-auto max-h-[600px]">
-              <pre class="!bg-transparent !m-0 !p-0"><code class="language-json">{{result.data.json | json}}</code></pre>
-            </div>
-          </div>
-        }
-      }
-    </div>
+    <!-- エラー表示 -->
+    <app-notification #notice></app-notification>
+    <!-- HTMLレンダリング -->
+    @if (result && result.html) {
+      <app-panel-layout
+        [title]="'htmlレンダリング'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto h-[600px]'"
+        [accordion]="false">
+        <div class="h-full w-full" style="overflow: auto;">
+          <iframe [srcdoc]="result.html" style="width: 100%; height: 100%; border: none;" sandbox="allow-same-origin"></iframe>
+        </div>
+      </app-panel-layout>
+    }
+    <!-- HTML表示 -->
+    @if (result && result.html) {
+      <app-panel-layout
+        [title]="'htmlコード'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto max-h-[600px]'"
+        [accordion]="false">
+        <pre class="!bg-transparent !m-0 !p-0"><code class="language-markup">{{result.html | prettyHtml | async}}</code></pre>
+      </app-panel-layout>
+    }
+    <!-- JSON結果 -->
+    @if (result && result.json) {
+      <app-panel-layout
+        [title]="'加工後json'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto max-h-[600px]'"
+        [accordion]="true">
+        <pre class="!bg-transparent !m-0 !p-0"><code class="language-json">{{result.json | json}}</code></pre>
+      </app-panel-layout>
+    }
   </app-content-spinner>
 </div>

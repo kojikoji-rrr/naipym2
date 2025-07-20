@@ -128,7 +128,7 @@ def get_artist_master():
     try:
         # メモ入力リスト取得
         query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "artist_notelist_query.sql")
-        notelist = DB_SERVICE.get_query_result_by_text(con, query)
+        notelist, rowcount = DB_SERVICE.get_query_result_by_text(con, query)
         if notelist: result['notelist'] = notelist
         
         return result
@@ -149,7 +149,7 @@ def get_artists_data_and_total(limit:int, offset:int, sort: Dict[str,bool], prop
         # 総件数取得
         total = DB_SERVICE.get_query_count_by_text(con, query)
         # 結果取得
-        result = DB_SERVICE.get_query_result_by_text(con, query, sort, limit, offset)
+        result, rowcount = DB_SERVICE.get_query_result_by_text(con, query, sort, limit, offset)
         # 結果を辞書形式に変換
         return {'total': total, 'result': result}
     except Exception as e:
@@ -167,7 +167,7 @@ def get_artists_data(limit:int, offset:int, sort: Dict[str,bool], props:Dict[str
 
     try:
         # 結果取得
-        result = DB_SERVICE.get_query_result_by_text(con, query, sort, limit, offset)
+        result, rowcount = DB_SERVICE.get_query_result_by_text(con, query, sort, limit, offset)
         # 結果を辞書形式に変換
         return result
     except Exception as e:

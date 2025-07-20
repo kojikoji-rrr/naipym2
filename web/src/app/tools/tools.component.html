@@ -1,17 +1,8 @@
 <div class="h-full w-full">
-  <!-- サイドメニュー -->
-  <ng-template #sideMenuContent>
-    <div class="p-4 space-y-4">
-      <h3 class="font-bold text-md mb-2">ツールページメニュー</h3>
-      <ul class="space-y-2">
-        特になし
-      </ul>
-    </div>
-  </ng-template>
   <!-- ページヘッダー -->
   <app-page-header [title]="'ツール一覧'"></app-page-header>
   <!-- タブコンテンツ -->
-  <div class="pb-16">
+  <div class="pb-5">
     <app-tab-layout
       [tabs]="[
         {routerLink: '/tools/p1', label: 'URL取得確認'},

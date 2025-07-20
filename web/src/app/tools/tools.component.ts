@@ -9,18 +9,4 @@ import { PageHeaderComponent } from '../common/components/page-header/page-heade
   imports: [RouterOutlet, PageHeaderComponent, TabLayoutComponent],
   templateUrl: './tools.component.html'
 })
-export class ToolsComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
-
-  constructor(private sideMenuService: SideMenuService) {}
-
-  // ビューの初期化後にテンプレートをサービスにセットする
-  ngAfterViewInit(): void {
-    this.sideMenuService.setContent(this.sideMenuContent);
-  }
-
-  // コンポーネントが破棄される時にテンプレートをクリアする
-  ngOnDestroy(): void {
-    this.sideMenuService.clearContent();
-  }
-}
+export class ToolsComponent {}

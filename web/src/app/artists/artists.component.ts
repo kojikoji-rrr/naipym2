@@ -13,6 +13,10 @@ import { FlexibleTableMobileColumn, FlexibleTableMobileComponent } from '../comm
 import { CellCopy, CellFavorite, CellFlag, CellLabel, CellLink, CellTextarea, CellThumb } from '../common/services/flexible-table.service';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../common/components/spinner/spinner.component';
+import { LabelOneContentComponent } from "../common/components/label-one-content/label-one-content.component";
+import { ContentsSectionComponent } from "../common/components/sidemenu-items/contents-section/contents-section.component";
+import { SidemenuCheckboxComponent } from "../common/components/sidemenu-items/checkbox/checkbox.component";
+import { SidemenuRadiosComponent } from "../common/components/sidemenu-items/radios/radios.component";
 
 const LOAD_LIMIT = 50;
 const THRESHOLD = 0;
@@ -58,7 +62,7 @@ export class SearchFormProps {
 
 @Component({
   selector: 'app-artists',
-  imports: [CommonModule, PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, SpinnerComponent, ContentSpinnerComponent, FlexibleModalComponent, FormsModule],
+  imports: [CommonModule, PageHeaderComponent, FlexibleTableDesktopComponent, FlexibleTableMobileComponent, SpinnerComponent, ContentSpinnerComponent, FlexibleModalComponent, FormsModule, ContentsSectionComponent, LabelOneContentComponent, SidemenuCheckboxComponent, SidemenuRadiosComponent],
   templateUrl: './artists.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -1,0 +1,8 @@
+<div class="grid gap-1" [ngClass]="`grid-cols-${col}`">
+  @for (item of itemEntries; track item.value) {
+    <label class="flex items-center">
+      <input type="radio" class="mr-1 h-3 w-3 text-blue-600" [name]="name" [value]="item.value" [checked]="changed === item.value" (change)="onRadioChange(item.value)">
+      <span class="text-xs">{{item.label}}</span>
+    </label>
+  }
+</div>

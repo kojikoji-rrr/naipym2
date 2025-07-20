@@ -99,7 +99,7 @@ class DBService:
 
         return total
 
-    def get_query_result_by_text(self, con:Session, query:str, sort:Dict[str,bool]|None = None, limit:int|None = None, offset:int|None = None) -> list[dict|str]:
+    def get_query_result_by_text(self, con:Session, query:str, sort:Dict[str,bool]|None = None, limit:int|None = None, offset:int|None = None) -> tuple[list[dict|str], int]:
         try:
             q = query
             if sort is not None:
@@ -107,9 +107,20 @@ class DBService:
             if limit is not None and offset is not None:
                 q = q + " " + self._create_limit_offset(limit, offset)
             result_query = text(q)
-            data = con.execute(result_query).fetchall()
+            execute_result = con.execute(result_query)
+            data = execute_result.fetchall()
             
-            return self._convert_result_by_list(data)
+            # データが取得できた場合（SELECT系）は取得行数、それ以外はマニュアルでROWCOUNTを取得
+            if data:
+                row_count = len(data)
+            else:
+                # INSERT/UPDATE/DELETE等の場合、changes()を使用
+                try:
+                    row_count = con.execute(text("SELECT changes()")).scalar() or 0
+                except:
+                    row_count = 0
+            
+            return self._convert_result_by_list(data), row_count
         except Exception as e:
             raise e
 

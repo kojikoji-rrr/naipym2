@@ -1,0 +1,6 @@
+<div class="my-2 w-auto h-auto">
+  <div [class]="isLabelTop ? 'flex flex-col space-y-1' : 'flex items-center justify-between'">
+    <span class="font-medium" [class]="`text-${labelSize}`">{{label}}</span>
+    <ng-content></ng-content>
+  </div>
+</div>

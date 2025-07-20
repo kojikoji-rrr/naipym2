@@ -1,8 +1,23 @@
 <div class="border rounded-lg" [ngClass]="panelClass" [ngStyle]="panelStyle">
-  <div class="p-2 bg-gray-50 border-b">
-    <h4 class="font-medium text-gray-900">{{title}}</h4>
+  <div class="p-2 bg-gray-50 border-b" 
+       [class.cursor-pointer]="isAccordionMode"
+       (click)="toggleExpanded()">
+    <div class="flex items-center justify-between">
+      <h4 class="font-medium text-gray-900">{{title}}</h4>
+      @if (isAccordionMode) {
+        <svg class="w-5 h-5 transition-transform duration-200" 
+             [class.rotate-180]="isExpanded" 
+             fill="none" 
+             stroke="currentColor" 
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      }
+    </div>
   </div>
-  <div class="bg-white text-sm" [ngClass]="contentClass" [ngStyle]="contentStyle">
-    <ng-content></ng-content>
-  </div>
+  @if (!isAccordionMode || isExpanded) {
+    <div class="bg-white text-sm" [ngClass]="contentClass" [ngStyle]="contentStyle">
+      <ng-content></ng-content>
+    </div>
+  }
 </div>

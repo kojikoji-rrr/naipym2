@@ -1,4 +1,66 @@
-<div>
-  <h2 class="text-xl font-bold mb-4">タブページ3</h2>
-  <p>これはタブページ3のコンテンツです。</p>
+<!-- サイドメニュー -->
+<ng-template #sideMenuContent>
+  <div class="p-4">
+    <h3 class="label-sidemenu-title">ツールメニュー</h3>
+    <ul class="space-y-2">
+      特になし３
+    </ul>
+  </div>
+</ng-template>
+
+<!-- メインコンテンツ -->
+<div class="h-full w-full">
+  <!-- 入力フォーム -->
+  <div class="mb-4 flex items-end justify-between gap-2">
+    <app-label-one-content [label]="'キーワード'" [isLabelTop]="true" [class]="'flex-1'">
+      <input type="text" class="input-text resize-none" [(ngModel)]="strInput" placeholder="danbooruタグ名を入力" />
+    </app-label-one-content>
+    <app-label-one-content [label]="'取得ページ数'" [isLabelTop]="true" [class]="'w-24'">
+      <input type="text" class="input-text resize-none" [(ngModel)]="pageInput" appNumberOnly />
+    </app-label-one-content>
+    <div class="my-2 w-16 flex justify-center">
+      <button class="button-primary button-medium mb-[1px]" [disabled]="!strInput || isLoading" (click)="search()">確認</button>
+    </div>
+  </div>
+  <!-- 結果欄 -->
+  <app-content-spinner [showSpinner]="isLoading" [showContentAlways]="true">
+    <!-- エラー表示 -->
+    <app-notification #notice></app-notification>
+    <!-- HTMLレンダリング -->
+    @if (result && result.html) {
+      <app-panel-layout
+        [title]="'htmlレンダリング'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto h-[600px]'"
+        [accordion]="false">
+        @for (html of result.html; track $index) {
+          <div class="h-full w-full" [ngClass]="!$last ? 'border-b' : ''" style="overflow: auto;">
+            <iframe [srcdoc]="html" style="width: 100%; height: 100%; border: none;" sandbox="allow-same-origin"></iframe>
+          </div>
+        }
+      </app-panel-layout>
+    }
+    <!-- HTML表示 -->
+    @if (result && result.html) {
+      <app-panel-layout
+        [title]="'htmlコード'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto max-h-[600px]'"
+        [accordion]="false">
+        @for (html of result.html; track $index) {
+          <pre class="!bg-transparent !m-0 !p-0"><code class="language-markup">{{html | prettyHtml | async}}</code></pre>
+        }
+      </app-panel-layout>
+    }
+    <!-- JSON結果 -->
+    @if (result && result.json) {
+      <app-panel-layout
+        [title]="'加工後json'"
+        [panelClass]="'my-2'"
+        [contentClass]="'overflow-auto max-h-[600px]'"
+        [accordion]="true">
+        <pre class="!bg-transparent !m-0 !p-0"><code class="language-json">{{result.json | json}}</code></pre>
+      </app-panel-layout>
+    }
+  </app-content-spinner>
 </div>

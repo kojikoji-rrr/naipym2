@@ -1,26 +1,28 @@
-<div class="h-full w-full">
-  <!-- バックアップボタン -->
-  <div>
-    <div class="mb-4 flex items-center">
-      <button
-        class="px-3 py-1 rounded border text-white"
-        [disabled]="isExecute"
-        [ngClass]="isExecute ? 'bg-gray-400': 'transition-colors border-blue-500 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 duration-150'"
-        (click)="execute()">
-        DBバックアップ実行
-      </button>
-      @if(isExecute) {
-        <div class="px-2">
-          <app-spinner [size]="'16px'"></app-spinner>
-        </div>
-      }
-    </div>
+<!-- サイドメニュー -->
+<ng-template #sideMenuContent>
+  <div class="p-4">
+    <h3 class="label-sidemenu-title">ツールメニュー</h3>
+    <ul class="space-y-2">
+      特になし５
+    </ul>
   </div>
-  <div class="pb-16 space-y-4">
-    <!-- エラー表示 -->
-    @if (result && result.code !== 200) {
-      <div class="p-3 bg-red-100 text-red-700 rounded border border-red-300">{{result.code}} : {{result.error}}</div>
+</ng-template>
+
+<!-- メインコンテンツ -->
+<div class="h-full w-full">
+  <div class="mb-4 flex items-center">
+    <!-- バックアップボタン -->
+    <button class="button-primary button-large" [disabled]="isExecute" (click)="execute()">DBバックアップ実行</button>
+    <!-- 処理中スピナー -->
+    @if(isExecute) {
+      <div class="px-2">
+        <app-spinner [size]="'16px'"></app-spinner>
+      </div>
     }
+  </div>
+  <div class="space-y-4">
+    <!-- エラー表示 -->
+    <app-notification #notice></app-notification>
     <!-- バックアップリスト -->
     <app-content-spinner [showSpinner]="isLoading">
       <div class="overflow-x-auto">

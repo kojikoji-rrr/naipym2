@@ -1,4 +1,116 @@
-<div>
-  <h2 class="text-xl font-bold mb-4">タブページ4</h2>
-  <p>これはタブページ4のコンテンツです。</p>
+<!-- サイドメニュー -->
+<ng-template #sideMenuContent>
+  <div class="p-4">
+    <h3 class="label-sidemenu-title">ツールメニュー</h3>
+    <ul class="space-y-2">
+      特になし４
+    </ul>
+  </div>
+</ng-template>
+
+<!-- メインコンテンツ -->
+<div class="h-full w-full">
+  <!-- PC用レイアウト -->
+  <div class="hidden md:block h-full flex flex-col">
+    <!-- 上段エリア（固定） -->
+    <app-resizable-panels 
+      [leftTemplate]="leftPanelTemplate"
+      [rightTemplate]="rightPanelTemplate"
+      [initialLeftWidth]="400"
+      [minWidth]="200"
+      [containerClass]="'mb-2 flex-shrink-0'"
+      (onResize)="editor.updateLayout()">
+      <!-- 左側エリア -->
+      <ng-template #leftPanelTemplate>
+        <div class="div-border p-2 overflow-x-auto overflow-y-auto h-96">
+          <app-content-spinner [showSpinner]="isLoading">
+            <app-notification #notice></app-notification>
+            @for (table of tableList | keyvalue; track table.key) {
+              <!-- 各テーブル情報 -->
+              <app-panel-layout [title]="table.key" [accordion]="false" [panelClass]="'mb-2'">
+                <app-flexible-table-desktop
+                  [data]="table.value"
+                  [thLabels]="tableListLabels"
+                  [styles]="tableListStyles"
+                  [hostClass]="'text-xs'"
+                  [nonOutBorder]="true">
+                </app-flexible-table-desktop>
+              </app-panel-layout>
+            }
+          </app-content-spinner>
+        </div>
+      </ng-template>
+      <!-- 右側エリア -->
+      <ng-template #rightPanelTemplate>
+        <div class="flex flex-col min-w-0 h-full">
+          <!-- SQL入力エリア -->
+          <div class="div-border p-2 flex-1 mb-2 min-w-0 overflow-hidden">
+            <app-monaco-editor [language]="'sql'" [theme]="'vs'" #editor> </app-monaco-editor>
+          </div>
+          <!-- 実行ボタン -->
+          <div class="flex gap-2 justify-end flex-shrink-0">
+            <button class="button-secondary button-large w-24" [disabled]="isExecute" (click)="clearLog()">ログクリア</button>
+            <button class="button-secondary button-large w-24" [disabled]="isExecute" (click)="clearQuery()">SQLクリア</button>
+            <button class="button-primary button-large w-24" [disabled]="isExecute" (click)="execute()">実行</button>
+          </div>
+        </div>
+      </ng-template>
+    </app-resizable-panels>
+    <app-content-spinner [showSpinner]="isExecute" [showContentAlways]="true">
+      <!-- 下段エリア（可変） -->
+      <div class="flex-1 flex flex-col gap-2 min-h-32">
+        <!-- 実行結果 -->
+        <div class="div-border p-2 overflow-y-hidden bg-amber-50 h-32">
+          <textarea class="w-full h-full bg-inherit resize-none p-2 font-mono text-sm focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-transparent" readonly placeholder="実行ログはありません。" [value]="queryLogs"></textarea>
+        </div>
+        <!-- SELECT結果 -->
+        @if (selectResult) {
+          <!-- SELECT実行結果が1件の場合 -->
+          @if (selectResult.length === 1) {
+            <div class="div-border p-2 h-80">
+              <div class="h-full w-full overflow-auto">
+                <app-flexible-table-desktop [data]="selectResult[0]" [hostClass]="'text-xs'"></app-flexible-table-desktop>
+              </div>
+            </div>
+          }
+          <!-- SELECT実行結果が2件以上の場合 -->
+          @else {
+            <div class="div-border p-2 h-80">
+              <app-local-tabs #localTabsRef>
+                @for (result of selectResult; track $index; let i = $index) {
+                  <div class="h-full w-full overflow-auto" [id]="`result-${$index}`" #tabContent>
+                    <app-flexible-table-desktop [data]="result" [hostClass]="'text-xs'"></app-flexible-table-desktop>
+                  </div>
+                }
+              </app-local-tabs>
+            </div>
+          }
+        }
+      </div>
+    </app-content-spinner>
+  </div>
+  <!-- モバイル用レイアウト -->
+  <div class="md:hidden flex flex-col gap-2">
+    <!-- テーブル一覧 -->
+    <div class="div-border p-2 flex-1">
+      aaa
+    </div>
+    <!-- SQL入力エリア -->
+    <div class="div-border p-2 flex-1">
+      iii
+    </div>
+    <!-- 実行ボタン -->
+    <div class="flex gap-2 justify-end flex-shrink-0">
+      <button class="button-secondary button-large w-24">クリア</button>
+      <button class="button-primary button-large w-24">実行</button>
+    </div>
+    <!-- 実行結果 -->
+    <div class="div-border p-2 flex-1">
+      uuu
+    </div>
+    <!-- SELECT結果 -->
+    <div class="div-border p-2 flex-1">
+      uuu
+    </div>
+  </div>
 </div>

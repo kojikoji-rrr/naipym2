@@ -4,3 +4,54 @@
 
 /* Prism.js テーマ */
 @import "~prismjs/themes/prism.css";
+
+/* ボーダー付きdiv */
+.div-border {
+    @apply border border-gray-300 rounded;
+}
+
+/* ボーダー付きinput */
+.input-text {
+    @apply w-full border rounded p-1 bg-white;
+}
+
+/* ボタン（青） */
+.button-primary {
+    @apply flex-shrink-0 whitespace-nowrap rounded text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 disabled:bg-gray-300 disabled:text-white;
+}
+
+/* ボタン（その他） */
+.button-secondary {
+    @apply flex-shrink-0 whitespace-nowrap rounded border border-gray-300 bg-white hover:bg-gray-50 hover:bg-gray-100 disabled:bg-gray-300 disabled:text-white;
+}
+
+/* ボタンサイズ大 */
+.button-large {
+    @apply px-4 py-2 text-base;
+}
+
+/* ボタンサイズ中 */
+.button-medium {
+    @apply px-3 py-1 text-base;
+}
+
+/* ボタンサイズ小 */
+.button-small {
+    @apply px-2 py-1 text-sm;
+}
+
+/* ボタンサイズ極小 */
+.button-x-small {
+    @apply px-2 py-1 text-xs;
+}
+
+/* 項目名用ミニラベル */
+.label-mini-h {
+    @apply block text-sm font-medium text-gray-700;
+}
+
+/* サイドメニュー用ヘッダ */
+.label-sidemenu-title {
+    @apply font-bold text-base mb-2;
+}
+

@@ -1,0 +1,18 @@
+<div class="w-full h-full flex flex-col">
+  <!-- タブヘッダー -->
+  <div class="border-b border-gray-200 flex-shrink-0">
+    <div class="overflow-x-auto overflow-y-hidden">
+      <nav class="-mb-px flex space-x-8 min-w-max">
+        @for (tab of tabs; track tab) {
+          <button (click)="setActiveTab(tab)" [class]="isActive(tab) ?  'border-blue-500 text-blue-600 bg-blue-50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'" class="whitespace-nowrap py-2 px-3 border-b-2 font-medium text-sm rounded-t-md transition-colors duration-150">
+            {{ tab }}
+          </button>
+        }
+      </nav>
+    </div>
+  </div>
+  <!-- タブコンテンツ -->
+  <div class="flex-1 mt-4 min-h-0" #tabContentContainer>
+    <ng-content></ng-content>
+  </div>
+</div>

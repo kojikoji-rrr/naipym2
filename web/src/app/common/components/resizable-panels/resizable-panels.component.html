@@ -1,0 +1,26 @@
+<div [class]="'grid-layout ' + containerClass" 
+     [style.grid-template-columns]="leftPanelWidth + 'px 8px minmax(0px, 1fr)'">
+  <!-- 左側パネル -->
+  <div>
+    <ng-container *ngTemplateOutlet="leftTemplate"></ng-container>
+  </div>
+  
+  <!-- リサイザー -->
+  <div class="bg-gray-200 hover:bg-gray-300 cursor-col-resize flex items-center justify-center" 
+       (mousedown)="onResizeStart($event)">
+    <div class="w-1 h-8 bg-gray-400 rounded pointer-events-none"></div>
+  </div>
+  
+  <!-- 右側パネル -->
+  <div style="min-width: 0; overflow: hidden;">
+    <ng-container *ngTemplateOutlet="rightTemplate"></ng-container>
+  </div>
+</div>
+
+<style>
+.grid-layout {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+</style>

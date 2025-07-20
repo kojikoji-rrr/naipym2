@@ -1,0 +1,6 @@
+<div class="my-2 space-y-2">
+  <h4 class="text-sm font-medium">{{title}}</h4>
+  <div [class]="type==='flex' ? 'flex-row' : `grid gap-1 grid-cols-${col}`">
+    <ng-content></ng-content>
+  </div>
+</div>

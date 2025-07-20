@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { FlexibleTableDesktopColumn, FlexibleTableDesktopComponent } from '../../../common/components/flexible-table/table-desktop/flexible-table-desktop.component';
 import { ContentSpinnerComponent } from '../../../common/components/content-spinner/content-spinner.component';
 import { ApiService } from '../../../common/services/api.service';
@@ -8,13 +8,17 @@ import { DateFormatPipe } from '../../../common/pipes/date-format/date-format.pi
 import { FileSizePipe } from '../../../common/pipes/file-size/file-size.pipe';
 import { FlexibleTableColumn } from '../../../common/components/flexible-table/table-base/flexible-table-base.component';
 import { SpinnerComponent } from '../../../common/components/spinner/spinner.component';
+import { NotificationComponent } from '../../../common/components/notification/notification.component';
+import { SideMenuService } from '../../../common/services/side-menu.service';
 
 @Component({
   selector: 'app-tools-page5',
-  imports: [CommonModule, SpinnerComponent, ContentSpinnerComponent, FlexibleTableDesktopComponent],
+  imports: [CommonModule, SpinnerComponent, ContentSpinnerComponent, FlexibleTableDesktopComponent, NotificationComponent],
   templateUrl: './tools-page5.component.html'
 })
-export class ToolsPage5Component implements AfterViewInit{
+export class ToolsPage5Component implements AfterViewInit, AfterViewInit, OnDestroy {
+  @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
+  @ViewChild("notice") notice!: NotificationComponent;
   isExecute:boolean = false;
   isLoading:boolean = true;
   data:{[key:string]: any}[] = [];
@@ -23,7 +27,10 @@ export class ToolsPage5Component implements AfterViewInit{
   musts:any = [];
   result:any = undefined;
 
-  constructor(private apiService:ApiService) {
+  constructor(
+    private sideMenuService: SideMenuService,
+    private apiService:ApiService
+  ) {
     this.labels = {
       "created_at": CellLabel("バックアップ日時"),
       "updated_at": CellLabel("最終更新日時"),
@@ -40,8 +47,14 @@ export class ToolsPage5Component implements AfterViewInit{
     };
     this.musts = ["delbtn"];
   }
-  
+
+  // コンポーネントが破棄される時にテンプレートをクリアする
+  ngOnDestroy(): void {
+    this.sideMenuService.clearContent();
+  }
+
   ngAfterViewInit(): void {
+    this.sideMenuService.setContent(this.sideMenuContent);
     this.apiService.getDBBackupList().subscribe(
       (response) => {
         this.data = this.transformData(response);
@@ -72,7 +85,7 @@ export class ToolsPage5Component implements AfterViewInit{
         if (res.code === 200) {
           this.transformData([res.fileinfo]).forEach(item => this.data.push(item));
         } else {
-          this.result = res;
+          this.notice.setNoticeError(res.code, res.error);
         }
         this.isExecute = false;
       }
@@ -88,7 +101,7 @@ export class ToolsPage5Component implements AfterViewInit{
         if (res.code === 200) {
           this.data = this.data.filter(item => item["filename"] !== filename);
         } else {
-          this.result = res;
+          this.notice.setNoticeError(res.code, res.error);
         }
         this.isExecute = false;
       }

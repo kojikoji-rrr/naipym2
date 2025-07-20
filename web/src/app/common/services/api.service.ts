@@ -15,7 +15,9 @@ export class ApiService {
         ARTIST_TYPE: `${this.API_BASE}/artist/mime`,
         TOOL_CURL: `${this.API_BASE}/tools/fetch`,
         TOOL_D_SEARCH_ARTIST: `${this.API_BASE}/tools/d_search_artist`,
-        TOOL_BAK_LIST: `${this.API_BASE}/tools/backup`,
+        TOOL_D_SEARCH_TAG: `${this.API_BASE}/tools/d_search_tag`,
+        TOOL_BACKUP: `${this.API_BASE}/tools/backup`,
+        TOOL_DATABASE: `${this.API_BASE}/tools/database`,
         FAVORITE: `${this.API_BASE}/favorite`,
     }
 
@@ -55,25 +57,47 @@ export class ApiService {
         return this.http.get(url.toString());
     }
 
-    public searchDanbooruByArtist(target:string, maxPage:string): Observable<any> {
+    public searchDanbooruByArtist(keyword:string, maxPage:string): Observable<any> {
         const url = new URL(this.urlResource.TOOL_D_SEARCH_ARTIST, this.API_URL);
-        url.searchParams.append('target', target);
+        url.searchParams.append('keyword', keyword);
+        url.searchParams.append('max_page', maxPage);
+        return this.http.get(url.toString());
+    }
+
+    public searchDanbooruByTag(keyword:string, maxPage:string): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_D_SEARCH_TAG, this.API_URL);
+        url.searchParams.append('keyword', keyword);
         url.searchParams.append('max_page', maxPage);
         return this.http.get(url.toString());
     }
 
     public getDBBackupList(): Observable<any> {
-        const url = new URL(this.urlResource.TOOL_BAK_LIST, this.API_URL);
+        const url = new URL(this.urlResource.TOOL_BACKUP, this.API_URL);
         return this.http.get(url.toString());
     }
 
     public createDBBackup(): Observable<any> {
-        const url = new URL(this.urlResource.TOOL_BAK_LIST, this.API_URL);
+        const url = new URL(this.urlResource.TOOL_BACKUP, this.API_URL);
         return this.http.post(url.toString(), {});
     }
     
     public deleteDBBackup(filename: string): Observable<any> {
-        const url = new URL(`${this.urlResource.TOOL_BAK_LIST}/${filename}`, this.API_URL);
+        const url = new URL(`${this.urlResource.TOOL_BACKUP}/${filename}`, this.API_URL);
         return this.http.delete(url.toString());
+    }
+
+    public getTablesAndLogs(): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_DATABASE, this.API_URL);
+        return this.http.get(url.toString());
+    }
+
+    public refleshQueryLogs(): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_DATABASE, this.API_URL);
+        return this.http.delete(url.toString());
+    }
+
+    public executeQuery(query:string): Observable<any> {
+        const url = new URL(this.urlResource.TOOL_DATABASE, this.API_URL);
+        return this.http.post(url.toString(), {query: query});
     }
 }

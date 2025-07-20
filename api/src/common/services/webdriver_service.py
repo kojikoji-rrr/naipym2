@@ -8,7 +8,7 @@ from typing import List
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from config import API_RESOURCE_DIR
+from config import PKI_DIR
 
 def create_webdriver(headless=False, minimum=True):
     chrome_service = Service(ChromeDriverManager().install())
@@ -160,7 +160,7 @@ def _wait_for_manual_intervention(driver, timeout=300):
     return False
 
 def _load_cookies(driver, domain):
-    cookies_file = f"{API_RESOURCE_DIR}/cookies_{domain}.pki"
+    cookies_file = f"{PKI_DIR}/cookies_{domain}.pki"
     if os.path.exists(cookies_file):
         try:
             with open(cookies_file, 'rb') as f:
@@ -173,7 +173,7 @@ def _load_cookies(driver, domain):
         print(f"クッキーファイルが存在しません: {cookies_file}")
 
 def _save_cookies(driver, domain):
-    cookies_file = f"{API_RESOURCE_DIR}/cookies_{domain}.pki"
+    cookies_file = f"{PKI_DIR}/cookies_{domain}.pki"
     try:
         os.makedirs(os.path.dirname(cookies_file), exist_ok=True)
         cookies = driver.get_cookies()

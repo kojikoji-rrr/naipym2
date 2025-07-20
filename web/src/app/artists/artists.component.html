@@ -1,113 +1,54 @@
 <div class="h-full w-full">
   <!-- サイドメニュー -->
   <ng-template #sideMenuContent>
-    <div class="p-4 space-y-4">
-      <h3 class="font-bold text-md mb-2">絵師ページメニュー</h3>
+    <div class="p-4">
+      <h3 class="label-sidemenu-title">絵師ページメニュー</h3>
       <!-- サンプル表示トグル -->
-      <div class="space-y-2 flex items-center justify-between">
-        <span class="text-sm">サンプル表示</span>
+      <app-label-one-content [label]="'サンプル表示'">
         <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" [ngClass]="isSample ? 'bg-blue-600' : 'bg-gray-200'" (click)="toggleSampleImage()">
           <span class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out" [ngClass]="isSample ? 'translate-x-6' : 'translate-x-1'"></span>
         </button>
-      </div>
+      </app-label-one-content>
       <!-- 表示切替 -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-medium">表示切替</h4>
-        <div class="grid grid-cols-2 gap-1">
-          @for (key of getHideableColumns(); track key) {
-            <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [checked]="!hideColumns.includes(key)" (change)="toggleColumnVisibility(key)">
-              <span class="text-xs">{{labels[key].label}}</span>
-            </label>
-          }
-        </div>
-      </div>
+      <sidemenu-contents-section [title]="'表示切替'" [type]="'grid'" [col]="2">
+        @for (key of getHideableColumns(); track key) {
+          <label class="flex items-center">
+            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [checked]="!hideColumns.includes(key)" (change)="toggleColumnVisibility(key)">
+            <span class="text-xs">{{labels[key].label}}</span>
+          </label>
+        }
+      </sidemenu-contents-section>
       <!-- キーワード検索 -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-medium">キーワード検索</h4>
-        <div class="grid grid-cols-3 gap-y-1 gap-x-1">
-          <!-- メモ -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByMemo">
-            <span class="text-xs">memo</span>
-          </label>
-          <!-- 他名 -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByOtherName">
-            <span class="text-xs">他名称</span>
-          </label>
-          <!-- タグ -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByTagName">
-            <span class="text-xs">タグ</span>
-          </label>
-          <!-- 絵師名 -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByArtistName">
-            <span class="text-xs">絵師名</span>
-          </label>
-          <!-- 生成モデル -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByModelName">
-            <span class="text-xs">生成ﾓﾃﾞﾙ</span>
-          </label>
-          <!-- 絵師ID -->
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.keywordByArtistID">
-            <span class="text-xs">絵師ID</span>
-          </label>
+      <sidemenu-contents-section [title]="'キーワード検索'" [type]="'flex'">
+        <div class="grid grid-cols-3 gap-1">
+          <sidemenu-checkbox [label]="'memo'" [(checked)]="props.keywordByMemo"></sidemenu-checkbox>
+          <sidemenu-checkbox [label]="'他名称'" [(checked)]="props.keywordByOtherName"></sidemenu-checkbox>
+          <sidemenu-checkbox [label]="'タグ'" [(checked)]="props.keywordByTagName"></sidemenu-checkbox>
+          <sidemenu-checkbox [label]="'絵師名'" [(checked)]="props.keywordByArtistName"></sidemenu-checkbox>
+          <sidemenu-checkbox [label]="'生成ﾓﾃﾞﾙ'" [(checked)]="props.keywordByModelName"></sidemenu-checkbox>
+          <sidemenu-checkbox [label]="'絵師ID'" [(checked)]="props.keywordByArtistID"></sidemenu-checkbox>
         </div>
         <!-- 入力欄 -->
-        <input type='text' class='w-full border rounded p-1 text-xs bg-white resize-none' placeholder='キーワードを入力' [(ngModel)]="props.keyword"/>
+        <input type='text' class='my-2 input-text text-xs resize-none' placeholder='キーワードを入力' [(ngModel)]="props.keyword"/>
         <!-- 検索オプション -->
-        <div class="grid grid-cols-2 gap-y-1 gap-x-1">
-          <label class="flex items-center">
-            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="0" [(ngModel)]="props.keywordOption">
-            <span class="text-xs">部分一致</span>
-          </label>
-          <label class="flex items-center">
-            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="1" [(ngModel)]="props.keywordOption">
-            <span class="text-xs">完全一致</span>
-          </label>
-          <label class="flex items-center">
-            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="2" [(ngModel)]="props.keywordOption">
-            <span class="text-xs">前方一致</span>
-          </label>
-          <label class="flex items-center">
-            <input type="radio" name="option" class="mr-1 h-3 w-3 text-blue-600" [value]="3" [(ngModel)]="props.keywordOption">
-            <span class="text-xs">後方一致</span>
-          </label>
-        </div>
-      </div>
+        <sidemenu-radios [col]="2" [name]="'option'" [(changed)]="props.keywordOption" [items]="{
+          '部分一致': 0,
+          '完全一致': 1,
+          '前方一致': 2,
+          '後方一致': 3
+        }"></sidemenu-radios>
+      </sidemenu-contents-section>
       <!-- ボタン横並び -->
-      <div class="flex gap-2">
-        <button (click)="onClearSearchForm()" class="flex-1 px-3 py-1 text-xs rounded border border-gray-300 bg-white hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150">クリア</button>
-        <button (click)="search()" class="flex-1 px-3 py-1 text-xs rounded border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150">検索</button>
+      <div class="my-2 flex gap-2">
+        <button (click)="onClearSearchForm()" class="button-secondary button-small flex-1">クリア</button>
+        <button (click)="search()" class="button-primary button-small  flex-1">検索</button>
       </div>
       <!-- その他の条件 -->
-      <div class="space-y-2">
-        <h4 class="text-sm font-medium">詳細条件</h4>
-        <!-- お気に入り -->
-        <div class="space-y-1">
-          <span class="text-xs font-medium">お気に入り</span>
-          <div class="flex gap-2">
-            <label class="flex items-center">
-              <input type="radio" name="favorite" class="mr-1 h-3 w-3 text-blue-600" [value]="undefined" [(ngModel)]="props.favorite">
-              <span class="text-xs">条件なし</span>
-            </label>
-            <label class="flex items-center">
-              <input type="radio" name="favorite" class="mr-1 h-3 w-3 text-blue-600" [value]="true" [(ngModel)]="props.favorite">
-              <span class="text-xs">ON</span>
-            </label>
-            <label class="flex items-center">
-              <input type="radio" name="favorite" class="mr-1 h-3 w-3 text-blue-600" [value]="false" [(ngModel)]="props.favorite">
-              <span class="text-xs">OFF</span>
-            </label>
-          </div>
-        </div>
-        <!-- ドメイン -->
-        <div class="space-y-1">
-          <span class="text-xs font-medium">ドメイン</span>
+      <sidemenu-contents-section [title]="'詳細条件'">
+        <app-label-one-content [label]="'お気に入り'" [isLabelTop]="true">
+          <sidemenu-radios [col]="3" [name]="'favorite'" [(changed)]="props.favorite" [items]="{'条件なし': undefined, 'ON': true, 'OFF': false}"></sidemenu-radios>
+        </app-label-one-content>
+        <app-label-one-content [label]="'ドメイン'" [isLabelTop]="true">
           <div class="flex gap-2">
             <label class="flex items-center">
               <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="danbooru" (change)="onChangeSearchDomain($event)">
@@ -118,55 +59,37 @@
               <span class="text-xs">gelbooru</span>
             </label>
           </div>
-        </div>
-        <!-- フラグ -->
-        <div class="space-y-1">
-          <span class="text-xs font-medium">フラグ</span>
-          <div class="flex gap-2">
-            <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isBanned">
-              <span class="text-xs">BAN</span>
-            </label>
-            <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isDeleted">
-              <span class="text-xs">DEL</span>
-            </label>
-          </div>
-        </div>
-        <!-- 画像 -->
-        <div class="space-y-1">
-          <span class="text-xs font-medium">画像</span>
-          <div class="flex gap-2">
-            <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isDled">
-              <span class="text-xs">DL済</span>
-            </label>
-            <label class="flex items-center">
-              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [(ngModel)]="props.isGened">
-              <span class="text-xs">生成済</span>
-            </label>
-          </div>
-        </div>        
-        <!-- post範囲検索 -->
-        <div class="space-y-1">
-          <span class="text-xs font-medium">post数範囲</span>
+        </app-label-one-content>
+        <app-label-one-content [label]="'BANフラグ'" [isLabelTop]="true">
+          <sidemenu-radios [col]="3" [name]="'banned'" [(changed)]="props.isBanned" [items]="{'条件なし': undefined, 'ON': true, 'OFF': false}"></sidemenu-radios>
+        </app-label-one-content>
+        <app-label-one-content [label]="'DELフラグ'" [isLabelTop]="true">
+          <sidemenu-radios [col]="3" [name]="'deleted'" [(changed)]="props.isDeleted" [items]="{'条件なし': undefined, 'ON': true, 'OFF': false}"></sidemenu-radios>
+        </app-label-one-content>
+        <app-label-one-content [label]="'DL画像'" [isLabelTop]="true">
+          <sidemenu-radios [col]="3" [name]="'dled'" [(changed)]="props.isDled" [items]="{'条件なし': undefined, 'DL済': true, '未DL': false}"></sidemenu-radios>
+        </app-label-one-content>
+        <app-label-one-content [label]="'画像生成'" [isLabelTop]="true">
+          <sidemenu-radios [col]="3" [name]="'gened'" [(changed)]="props.isGened" [items]="{'条件なし': undefined, '生成済': true, '未生成': false}"></sidemenu-radios>
+        </app-label-one-content>
+        <app-label-one-content [label]="'post数範囲'" [isLabelTop]="true">
           <div class="flex items-center gap-1">
             <input type="number" class="border rounded p-1 text-xs w-full" placeholder="0" min="0" max="99999" [(ngModel)]="props.postCountMin">
             <span class="text-xs">〜</span>
             <input type="number" class="border rounded p-1 text-xs w-full" placeholder="99999" min="0" max="99999" [(ngModel)]="props.postCountMax">
           </div>
-        </div>
-      </div>
+        </app-label-one-content>
+      </sidemenu-contents-section>
       <!-- ボタン横並び -->
-      <div class="flex gap-2">
-        <button (click)="onClearSearchForm()" class="flex-1 px-3 py-1 text-xs rounded border border-gray-300 bg-white hover:bg-gray-100 active:bg-gray-200 transition-colors duration-150">クリア</button>
-        <button (click)="search()" class="flex-1 px-3 py-1 text-xs rounded border border-blue-500 bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors duration-150">検索</button>
+      <div class="my-2 flex gap-2">
+        <button (click)="onClearSearchForm()" class="button-secondary button-small flex-1">クリア</button>
+        <button (click)="search()" class="button-primary button-small flex-1">検索</button>
       </div>
     </div>
   </ng-template>
   <!-- ページヘッダー -->
   <app-page-header [title]="'絵師検索'">
-    <button class="px-2 py-1 ml-4 text-xs rounded border border-gray-300 bg-white hover:bg-blue-100 active:bg-blue-200 transition-colors duration-150" (click)="onClearSort();">
+    <button class="button-secondary button-small" (click)="onClearSort();">
       ソート解除
     </button>
   </app-page-header>
@@ -221,15 +144,15 @@
   [isOpen]="isOpenImageModal"
   [size]="'full'"
   (closeEvent)="closeImageModal()">
-  <div class="flex flex-col md:flex-row gap-4 p-4 h-full overflow-hidden">
-    <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
+  <div class="md:flex-row flex flex-col gap-4 p-4 h-full overflow-hidden">
+    <div class="md:w-1/2 flex justify-center items-center w-full h-full min-h-0">
       @if (modalImageA && modalImageA.mimeType.includes("image/")) {
         <img [src]="modalImageA.url" class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageA.url, '_blank')"/>
       } @else if (modalImageA && modalImageA.mimeType.includes("video/")) {
         <video [src]="modalImageA.url" controls class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageA.url, '_blank')"></video>
       }
     </div>
-    <div class="flex justify-center items-center w-full md:w-1/2 h-full min-h-0">
+    <div class="flex justify-center items-center w-full h-full min-h-0">
       @if (modalImageB && modalImageB.mimeType.includes("image/")) {
         <img [src]="modalImageB.url" class="w-full h-full object-contain rounded shadow" (click)="window.open(modalImageB.url, '_blank')"/>
       } @else if (modalImageB && modalImageB.mimeType.includes("video/")) {

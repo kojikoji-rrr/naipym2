@@ -12,4 +12,23 @@ export class PanelLayoutComponent {
     @Input() panelStyle?:{[key:symbol]:string};
     @Input() contentClass?:string;
     @Input() contentStyle?:{[key:symbol]:string};
+    @Input() accordion?:boolean;
+    
+    isExpanded:boolean = false;
+    
+    ngOnInit() {
+        if (this.accordion !== undefined) {
+            this.isExpanded = this.accordion;
+        }
+    }
+    
+    toggleExpanded() {
+        if (this.accordion !== undefined) {
+            this.isExpanded = !this.isExpanded;
+        }
+    }
+    
+    get isAccordionMode(): boolean {
+        return this.accordion !== undefined;
+    }
 }

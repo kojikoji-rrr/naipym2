@@ -1,14 +1,17 @@
 from datetime import datetime
 from pathlib import Path
 import shutil
+from typing import Any, Dict
 from urllib.parse import urlparse
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from util import get_file_info
 from src.common.services.webdriver_service import create_webdriver, get
-from src.common.services.danbooru_service import get_post as danbooru_get_post, search_artist as danbooru_search_artist
+from src.common.services.danbooru_service import get_post as danbooru_get_post, search_artist as danbooru_search_artist, search_tag as danbooru_search_tag
 from src.common.services.gelbooru_service import get_post as gelbooru_get_post
-from config import API_BASE, DB_BACKUP_DIR, RESOURCES_DIR
+from config import API_BASE, API_RESOURCE_DIR, DB_BACKUP_DIR, DB_SERVICE, LOGS_DIR, RESOURCES_DIR
+import time
 
 BASE_URI = f"{API_BASE}/tools"
 router = APIRouter()
@@ -48,18 +51,45 @@ def fetch(target:str):
         driver.quit()
 
 @router.get(f"{BASE_URI}/d_search_artist")
-def search_danbooru_by_artist(target:str, max_page:int):
+def search_danbooru_by_artist(keyword:str, max_page:int):
     driver = None
     driver = create_webdriver(False, True)
 
     try:
-        soups, html_contents, artists = danbooru_search_artist(driver, target, max_page)
+        soups, html_contents, artists = danbooru_search_artist(driver, keyword, max_page)
 
         return JSONResponse(content={
             'code': 200,
             'data': {
                 'html': html_contents,
                 'json': artists
+            }
+        })
+    
+    except Exception as e:
+        error_code = getattr(e, 'code', 500)
+        error_message = getattr(e, 'message', str(e))
+        return JSONResponse(content={
+            'code': error_code, 
+            'error': error_message
+        })
+    
+    finally:
+        driver.quit()
+
+@router.get(f"{BASE_URI}/d_search_tag")
+def search_danbooru_by_tag(keyword:str, max_page:int):
+    driver = None
+    driver = create_webdriver(False, True)
+
+    try:
+        soups, html_contents, tags = danbooru_search_tag(driver, keyword, max_page)
+
+        return JSONResponse(content={
+            'code': 200,
+            'data': {
+                'html': html_contents,
+                'json': tags
             }
         })
     
@@ -121,3 +151,119 @@ def delete_backup(filename: str):
 
     except Exception as e:
         return {"code": 500, "error": str(e)}
+
+@router.get(f"{BASE_URI}/database")
+def get_tables_and_logs():
+    con = DB_SERVICE.open_session()
+    result = {'code': 200, 'data': [], 'logs': []}
+       
+    try:
+        # テーブルリスト取得
+        query = DB_SERVICE.load_sql(API_RESOURCE_DIR / "tools_tablelist_query.sql")
+        data, rowcount = DB_SERVICE.get_query_result_by_text(con, query)
+        if data: result['data'] = data
+
+        # ログ取得
+        log_path = LOGS_DIR / 'query_result.log'
+        if log_path.exists():
+            with open(log_path, 'r', encoding='utf-8') as f:
+                logs = [line.rstrip('\n\r') for line in f.readlines()]
+            result['logs'] = logs
+
+        return result
+    
+    except Exception as e:
+        result['code'] = 500
+        result['error'] = str(e)
+        return result
+    
+    finally:
+        con.close()
+
+@router.delete(f"{BASE_URI}/database")
+def delete_query_log():
+    result:Dict[str, Any] = {'code': 200}
+       
+    try:
+        log_path = LOGS_DIR / 'query_result.log'
+        if log_path.exists():
+            log_path.unlink()
+        
+        log_path.touch()
+
+        return result
+    
+    except Exception as e:
+        result['code'] = 500
+        result['error'] = str(e)
+        return result
+
+@router.post(f"{BASE_URI}/database")
+async def execute_query(request: Request):
+    con = DB_SERVICE.open_session()
+    log_path = LOGS_DIR / 'query_result.log'
+    logs = []
+    results = []
+    
+    try:
+        # リクエストボディからJSONを取得
+        body = await request.json()
+        query = body.get('query', '')
+        
+        # ;でqueryを分割
+        queries = [q.strip() for q in query.split(';') if q.strip()]
+        
+        # 順にSQLを処理
+        for i, q in enumerate(queries, 1):
+            # 実行前の時間計測
+            start_time = time.time()
+            
+            # log_pathにログ書き込み「-- {i} 行目:\r\n{q}」 -> logsに格納
+            log_msg = f"-- {i} 行目:\r\n{q}"
+            logs.append(log_msg)
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(log_msg + '\r\n')
+            
+            try:
+                # 結果取得
+                result, rowcount = DB_SERVICE.get_query_result_by_text(con, q)
+                
+                # 実行時間計算
+                elapsed_ms = int((time.time() - start_time) * 1000)
+                
+                if result:
+                    # SELECT系の場合
+                    cnt = len(result)
+                    log_msg = f"{cnt} 行が {elapsed_ms}ms で返されました"
+                    results.append(result)
+                else:
+                    # INSERT/UPDATE/DELETE系の場合
+                    log_msg = f"{rowcount} 行に影響しました ({elapsed_ms}ms)"
+                
+                logs.append(log_msg)
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(log_msg + '\r\n')
+                    
+            except Exception as e:
+                # エラーの場合はログにエラーを書き込みbreak
+                elapsed_ms = int((time.time() - start_time) * 1000)
+                error_msg = f"エラー ({elapsed_ms}ms): {str(e)}"
+                logs.append(error_msg)
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(error_msg + '\r\n')
+                break
+                
+    except Exception as e:
+        error_msg = f"クエリ処理エラー: {str(e)}"
+        logs.append(error_msg)
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(error_msg + '\r\n')
+    
+    finally:
+        con.close()
+    
+    # 結果を辞書形式に変換
+    return {
+        'logs': logs,     # 実行結果ログ
+        'result': results # selectクエリの結果
+    }
