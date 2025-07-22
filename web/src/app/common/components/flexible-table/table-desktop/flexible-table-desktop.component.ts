@@ -23,11 +23,11 @@ export interface FlexibleTableDesktopColumn {
   host: {'[class]': 'hostClass'},
 })
 export class FlexibleTableDesktopComponent extends FlexibleTableBaseComponent {
-  // 行の高さ（全体指定）
-  @Input() rowHeight?: string;
+  // 行の高さ（px指定）
+  @Input() rowHeight: number = 40;
   // スタイル設定
   @Input() styles: {[key:string]: FlexibleTableDesktopColumn} = {}
-  @Input() hostClass:string = "";
+  // 外側の枠線
   @Input() nonOutBorder:boolean = false;
 
   constructor(

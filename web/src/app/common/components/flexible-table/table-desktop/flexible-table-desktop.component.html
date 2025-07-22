@@ -22,7 +22,7 @@
         </td>
       </tr>
     } @else {
-      @for (row of data; track trackByFn($index, row)) {
+      @for (row of data; track getTrackByKey($index, row)) {
         <tr class="hover:bg-gray-50" [style.height]="rowHeight || 'auto'">
           @for (key of getVisibleColumns(); track key) {
             <td

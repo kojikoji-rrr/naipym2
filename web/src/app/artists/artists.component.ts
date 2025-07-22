@@ -85,8 +85,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   total:number = 0;
   // 表示データ
   data: Array<{[key:string]: any}> = [];
-  // trackByキー
-  trackByKeys: Array<string> = [];
   // ヘッダラベル
   labels: {[key:string]: FlexibleTableColumn} = {};
   // スタイル
@@ -189,8 +187,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       'gen_url'       : {isViewBottom:true},
       'img_url'       : {isViewBottom:true}
     };
-    // trackByキー
-    this.trackByKeys = ['tag', 'tag_id', 'artist_id'];
     // 非表示カラム
     this.hideColumns = ["tag_id", "artist_id", "other_names", "img_name", "dled_at", "last_dled_at", "gen_model", "gen_name", "gened_at", "last_gened_at"];
     // ソート情報
@@ -261,9 +257,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
   transformData(response:[{[key:string]:any}]) {
     return response.map((item, index) => {
       const processedItem = { ...item };
-      
-      // 事前計算済みIDを追加（trackBy最適化用）
-      processedItem['_cachedId'] = `${item['tag']}_${item['artist_id']}_${this.data.length + index}`;
       
       // domainの処理（カンマで分割し、それぞれを最初のピリオドより前の文字列だけ抜き出し、<br>で連結）
       if (item['domain']) {
@@ -392,7 +385,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           url: this.getImageUrl(img_path, false)
         }
       }
-      this.cdr.detectChanges(); // 非同期処理内でChange Detection
+      this.cdr.detectChanges();
     });
     this.apiService.getImageType(this.isSample ? "sample" : gen_path).subscribe((typeB: string) => {
       if (typeB != 'none') {
@@ -401,7 +394,7 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
           url: this.getImageUrl(gen_path, false)
         }
       }
-      this.cdr.detectChanges(); // 非同期処理内でChange Detection
+      this.cdr.detectChanges();
     });
 
     // モーダル表示前に履歴に状態を追加
@@ -427,9 +420,6 @@ export class ArtistsComponent implements OnInit, AfterViewInit, OnDestroy {
       data['gen_url'] = this.getImageUrl(data['gen_path'], true);
       data['img_url'] = this.getImageUrl(data['img_path'], true);
     });
-    // Injectorキャッシュをクリア（動的コンポーネントの更新を強制）
-    this.artistTableDesktop?.clearInjectorCache?.();
-    this.artistTableMobile?.clearInjectorCache?.();
     this.cdr.detectChanges();
   }
 

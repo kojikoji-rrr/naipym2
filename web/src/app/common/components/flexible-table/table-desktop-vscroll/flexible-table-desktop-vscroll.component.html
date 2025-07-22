@@ -1,0 +1,50 @@
+<cdk-virtual-scroll-viewport appendOnly [itemSize]="rowHeight" class="h-full">
+  <table class="min-w-full table-fixed bg-white border-gray-300 shadow-sm rounded-lg" [class]="nonOutBorder ? '' : 'border'">
+    <thead>
+      <tr class="bg-gray-50">
+        @for (key of getVisibleColumns(); track key) {
+          <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
+              [ngClass]="styles[key] && styles[key].colClass"
+              [style.width]="styles[key] && styles[key].width ? styles[key].width : 'auto'"
+              (click)="onChangeSort(key)">
+            @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
+            <span class="align-middle text-xs">
+              @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼}
+            </span>
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody class="bg-transparent divide-y divide-gray-200">
+      @if (data.length===0) {
+        <tr>
+          <td class="text-center text-gray-400" [attr.colspan]="getVisibleColumns().length">
+            --- No data ---
+          </td>
+        </tr>
+      } @else {
+        @for (row of data; track getTrackByKey($index, row)) {
+          <tr *cdkVirtualFor="let row of data; trackBy: getTrackByKey" class="hover:bg-gray-50" [style.height.px]="rowHeight || 'auto'">
+            @for (key of getVisibleColumns(); track key) {
+              <td class="p-0"
+                [style.width]="styles[key] && styles[key].width ? styles[key].width : 'auto'"
+                [style.height]="rowHeight || 'auto'"
+                [ngClass]="styles[key] && styles[key].rowClass"
+                [ngStyle]="styles[key] && styles[key].rowStyle">
+                @if (forcefulColumns.includes(key) || row[key] !== undefined) {
+                  @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
+                    <div class="w-full h-full">
+                      <ng-container *ngComponentOutlet="thLabels[key].component; injector:createInjector(key,row);"></ng-container>
+                    </div>
+                  } @else {
+                    <span class="items-center" [innerHTML]="getSafeHtml(row[key])"></span>
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</cdk-virtual-scroll-viewport>

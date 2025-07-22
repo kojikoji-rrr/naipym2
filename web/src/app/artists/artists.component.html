@@ -105,11 +105,10 @@
             [data]="data"
             [thLabels]="labels"
             [hideColumns]="hideColumns"
-            [trackByKeys]="trackByKeys"
             [sortedColumns]="sort"
             [styles]="desktopStyles"
             [parentComponent]="this"
-            [rowHeight]="'280px'"
+            [rowHeight]="280"
             (sortEvent)="onChangeSort($event)">
           </app-flexible-table-desktop>
         </div>
@@ -119,11 +118,10 @@
             [data]="data"
             [thLabels]="labels"
             [hideColumns]="hideColumns"
-            [trackByKeys]="trackByKeys"
             [sortedColumns]="sort"
             [styles]="mobileStyles"
             [parentComponent]="this"
-            [rowHeight]="'280px'"
+            [bottomHeight]="280"
             (sortEvent)="onChangeSort($event)">
           </app-flexible-table-mobile>
         </div>

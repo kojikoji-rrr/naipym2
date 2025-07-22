@@ -24,10 +24,12 @@ export interface FlexibleTableMobileColumn {
   imports: [CommonModule]
 })
 export class FlexibleTableMobileComponent extends FlexibleTableBaseComponent {
-  // 行の高さ
-  @Input() rowHeight?: string = '180px';
-  // ヘッダ行の高さ
-  @Input() headerHeight?: string = '80px';
+  // 上行の高さ
+  @Input() topHeight: number = 80;
+  // 中行の高さ
+  @Input() middleHeight: number = 50;
+  // 下行の高さ
+  @Input() bottomHeight: number = 180;
   // スタイル設定
   @Input() styles: {[key:string]: FlexibleTableMobileColumn} = {}
 

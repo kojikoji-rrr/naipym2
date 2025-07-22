@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, Injector, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Injector, ChangeDetectorRef, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SafeHtml, DomSanitizer } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
 
 // 共通列定義
 export interface FlexibleTableColumn {
@@ -33,17 +34,24 @@ export interface InjectedData {
   template: '',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[class]': 'hostClass'},
 })
 export class FlexibleTableBaseComponent {
   // 表示データ
-  @Input() data: Array<{[key:string]: any}> = [];
+  _data: Array<{[key:string]: any}> = [];
+  @Input() set data(value:any) {
+    var before = {...this._data};
+    this._data = value;
+    this.onChangeData(before);
+  } get data(): Array<{[key:string]: any}> {
+    return this._data;
+  }
+  @Input() hostClass?:string = "";
   // ヘッダラベル
   @Input() thLabels: {[key:string]: FlexibleTableColumn} = {}
   // 非表示カラム
   @Input() hideColumns: Array<string> = [];
-  // キー項目
-  @Input() trackByKeys: Array<string> = [];
   // データが無くても表示する項目
   @Input() forcefulColumns: Array<string> = [];
   // ソート初期値
@@ -54,16 +62,14 @@ export class FlexibleTableBaseComponent {
   @Output() sortEvent = new EventEmitter<{[key:string]: boolean}>();
   // 列コンポーネント
   rowComponents = new Map<any, Map<string, any>>();
-  // SafeHtmlキャッシュ
-  private safeHtmlCache = new Map<string, SafeHtml>();
-  // Injectorキャッシュ
-  private injectorCache = new Map<string, Injector>();
 
   constructor(
     public injector: Injector,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef
   ) {}
+
+  onChangeData(before: Array<{[key:string]: any}>) {}
 
   onChangeSort(key: string) {
     // ソートキー追加（新しいオブジェクトを作成）
@@ -104,19 +110,6 @@ export class FlexibleTableBaseComponent {
       this.cdr.markForCheck();
     }
   }
-  
-  trackByFn(index: number, row: { [key: string]: any }): any {
-    // 事前計算済みIDがある場合は優先使用
-    if (row['_cachedId']) {
-      return row['_cachedId'];
-    }
-    
-    if (this.trackByKeys && this.trackByKeys.length > 0) {
-      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
-      return keyValue ?? index;
-    }
-    return index;
-  }
 
   getVisibleColumns(): string[] {
     if (this.data.length === 0) return [];
@@ -129,36 +122,16 @@ export class FlexibleTableBaseComponent {
     return allKeys.filter(key => !this.hideColumns.includes(key));
   }
 
-  getRowComponent(rowTrackByKeys: Array<any>, column: string): any | undefined {
-    return this.rowComponents.get(rowTrackByKeys.join('_'))?.get(column);
-  }
-
-  createInjector(key:string, row:{[key:string]:any}): Injector {
-    const trackByValue = this.trackByFn(0, row);
-    const cacheKey = `${trackByValue}_${key}`;
-    
-    // キャッシュされたInjectorがあれば再利用
-    if (this.injectorCache.has(cacheKey)) {
-      const cachedInjector = this.injectorCache.get(cacheKey)!;
-      // データを更新
-      const data = cachedInjector.get('data') as InjectedData;
-      data.row = row; // 最新のrowデータで更新
-      return cachedInjector;
-    }
-    
+  createInjector(key:string, row:{[key:string]:any}): Injector {  
     const data: InjectedData = {
       parentComponent: this.parentComponent,
       key: key,
       row: row,
       register: (instance: any) => {
-        if (!this.rowComponents.has(trackByValue)) {
-          this.rowComponents.set(trackByValue, new Map());
-        }
-        this.rowComponents.get(trackByValue)!.set(key, instance);
+        this.rowComponents.get(key)?.set(key, instance);
       },
       unregister: () => {
-        this.rowComponents.get(trackByValue)?.delete(key);
-        this.injectorCache.delete(cacheKey); // キャッシュも削除
+        this.rowComponents.get(key)?.delete(key);
       },
     };
     
@@ -171,8 +144,6 @@ export class FlexibleTableBaseComponent {
       parent: this.injector
     });
     
-    // Injectorをキャッシュ
-    this.injectorCache.set(cacheKey, injector);
     return injector;
   }
 
@@ -180,18 +151,7 @@ export class FlexibleTableBaseComponent {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
   }
 
-  // キャッシュ付きSafeHTML取得
-  getCachedSafeHtml(htmlString: string): SafeHtml {
-    const cacheKey = String(htmlString);
-    if (!this.safeHtmlCache.has(cacheKey)) {
-      this.safeHtmlCache.set(cacheKey, this.sanitizer.bypassSecurityTrustHtml(htmlString));
-    }
-    return this.safeHtmlCache.get(cacheKey)!;
-  }
-
-  // Injectorキャッシュをクリア
-  clearInjectorCache() {
-    this.injectorCache.clear();
-    this.cdr.detectChanges();
+  getTrackByKey(index: number, row: any): any {
+    return row['trackByKey'] ?? Object.values(row).filter((val)=> ['string','number'].includes(typeof val)).join("_");
   }
 }
