@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, Boolean
 from sqlalchemy.sql import func
 
-from src.common.services.db_service import Base
+from src.common.services.db_service import Base, now
 
 class PostData(Base):
     __tablename__ = 'post_data'
@@ -12,7 +12,7 @@ class PostData(Base):
     rating = Column(Text)
     score = Column(Text)
     upload_date = Column(Text)
-    created_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
-    updated_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
+    created_at = Column(Text, nullable=False, default=now())
+    updated_at = Column(Text, nullable=False, default=now())
     is_delete = Column(Boolean, default=0)
     last_fetched_at = Column(Text)

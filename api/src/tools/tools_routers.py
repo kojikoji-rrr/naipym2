@@ -167,7 +167,7 @@ def get_tables_and_logs():
         log_path = LOGS_DIR / 'query_result.log'
         if log_path.exists():
             with open(log_path, 'r', encoding='utf-8') as f:
-                logs = [line.rstrip('\n\r') for line in f.readlines()]
+                logs = [line.rstrip('\n') for line in f.readlines()]
             result['logs'] = logs
 
         return result
@@ -219,10 +219,10 @@ async def execute_query(request: Request):
             start_time = time.time()
             
             # log_pathにログ書き込み「-- {i} 行目:\r\n{q}」 -> logsに格納
-            log_msg = f"-- {i} 行目:\r\n{q}"
+            log_msg = f"-- {i} 行目:\n{q}"
             logs.append(log_msg)
             with open(log_path, 'a', encoding='utf-8') as f:
-                f.write(log_msg + '\r\n')
+                f.write(log_msg + '\n')
             
             try:
                 # 結果取得
@@ -242,7 +242,7 @@ async def execute_query(request: Request):
                 
                 logs.append(log_msg)
                 with open(log_path, 'a', encoding='utf-8') as f:
-                    f.write(log_msg + '\r\n')
+                    f.write(log_msg + '\n')
                     
             except Exception as e:
                 # エラーの場合はログにエラーを書き込みbreak
@@ -250,14 +250,14 @@ async def execute_query(request: Request):
                 error_msg = f"エラー ({elapsed_ms}ms): {str(e)}"
                 logs.append(error_msg)
                 with open(log_path, 'a', encoding='utf-8') as f:
-                    f.write(error_msg + '\r\n')
+                    f.write(error_msg + '\n')
                 break
                 
     except Exception as e:
         error_msg = f"クエリ処理エラー: {str(e)}"
         logs.append(error_msg)
         with open(log_path, 'a', encoding='utf-8') as f:
-            f.write(error_msg + '\r\n')
+            f.write(error_msg + '\n')
     
     finally:
         con.close()

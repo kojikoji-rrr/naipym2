@@ -10,6 +10,8 @@ import { CellFlag, CellLabel } from '../../../common/services/flexible-table.ser
 import { MonacoEditorComponent } from '../../../common/components/monaco-editor/monaco-editor.component';
 import { ResizablePanelsComponent } from '../../../common/components/resizable-panels/resizable-panels.component';
 import { LocalTabsComponent } from '../../../common/components/local-tabs/local-tabs.component';
+import { FlexibleTableDesktopVScrollComponent } from "../../../common/components/flexible-table/table-desktop-vscroll/flexible-table-desktop-vscroll.component";
+import { ContentsSectionComponent } from "../../../common/components/sidemenu-items/contents-section/contents-section.component";
 
 export interface ColumnData {
   columnName:string,
@@ -21,7 +23,7 @@ export interface ColumnData {
 
 @Component({
   selector: 'app-tools-page4',
-  imports: [CommonModule, ContentSpinnerComponent, NotificationComponent, PanelLayoutComponent, FlexibleTableDesktopComponent, MonacoEditorComponent, ResizablePanelsComponent, LocalTabsComponent],
+  imports: [CommonModule, ContentSpinnerComponent, NotificationComponent, PanelLayoutComponent, FlexibleTableDesktopComponent, MonacoEditorComponent, ResizablePanelsComponent, LocalTabsComponent, FlexibleTableDesktopVScrollComponent, ContentsSectionComponent],
   templateUrl: './tools-page4.component.html'
 })
 export class ToolsPage4Component implements AfterViewInit, OnDestroy {
@@ -29,6 +31,8 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
   @ViewChild('sideMenuContent') sideMenuContent!: TemplateRef<any>;
   @ViewChild("notice") noticeComponent!: NotificationComponent;
   tableList:{[key:string]:ColumnData[]} = {};
+  tableNames:string[] = [];
+
   tableListLabels:any = {};
   tableListStyles:any = {};
   isLoading:boolean = true;
@@ -36,6 +40,7 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
 
   queryLogs?:string = "";
   selectResult?:[{[key:string]:any}[]] = undefined;
+  editorValue:string = "";
 
   constructor(
     private sideMenuService: SideMenuService,
@@ -65,7 +70,7 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
       (response) => {
         if (response.code === 200) {
           this.tableList = this.transformData(response.data);
-          this.queryLogs = response.logs.join("\r\n");
+          this.queryLogs = response.logs.join("\n");
         } else {
           this.noticeComponent.setNoticeError(response.code, response.error);
         }
@@ -81,9 +86,9 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
 
   transformData(response:[{[key:string]:any}]) {
     var result:{[key:string]:ColumnData[]} = {};
-    var tableNames = Array.from(new Set(response.map((data) => data["table_name"])));
+    this.tableNames = Array.from(new Set(response.map((data) => data["table_name"])));
 
-    for (let tableName of tableNames) {
+    for (let tableName of this.tableNames) {
       var columnList:ColumnData[] = [];
       response.filter((data) => data['table_name'] === tableName).forEach((column) => {
         columnList.push({
@@ -101,11 +106,15 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
   }
 
   setQuery(str:string) {
-    this.editor.setValue(str);
+    this.editorValue = str;
   }
 
   clearQuery() {
     this.setQuery("");
+  }
+
+  onEditorValueChange(value: string) {
+    this.editorValue = value;
   }
 
   clearLog() {
@@ -121,7 +130,7 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
   }
 
   execute() {
-    const query = this.editor.getValue();
+    const query = this.editorValue;
     if (!query.trim()) {
       return;
     }
@@ -130,11 +139,11 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
     this.apiService.executeQuery(query).subscribe(
       (response) => {
         if (response.logs && response.logs.length > 0) {
-          this.queryLogs += (this.queryLogs ? '\r\n' : '') + response.logs.join('\r\n');
+          this.queryLogs += (this.queryLogs ? '\n' : '') + response.logs.join('\n');
         }
         if (response.result && response.result.length > 0) {
           // SELECT結果が返された場合
-          this.selectResult = response.result;
+          this.selectResult = this.transformResult(response.result);
         } else {
           // INSERT/UPDATE/DELETE等の場合
           this.selectResult = undefined;
@@ -143,8 +152,19 @@ export class ToolsPage4Component implements AfterViewInit, OnDestroy {
       },
       (error) => {
         this.isExecute = false;
-        this.queryLogs += (this.queryLogs ? '\r\n' : '') + `[code:${error.status || 500}] ${error.error?.error || "クエリ実行エラーが発生しました"}`;
+        this.queryLogs += (this.queryLogs ? '\n' : '') + `[code:${error.status || 500}] ${error.error?.error || "クエリ実行エラーが発生しました"}`;
       }
     );
+  }
+
+  transformResult(tableDatas: [{[key: string]: any}[]]) {
+    for (const datas of tableDatas) {
+      datas.forEach((data, index) => {datas[index] = { '#': index + 1, ...data }; });
+    }
+    return tableDatas;
+  }
+
+  getSQLBySelectTable(tableName: string) {
+    this.setQuery(`SELECT * FROM ${tableName} limit 100;`);
   }
 }

@@ -21,16 +21,21 @@ export interface FlexibleTableMobileColumn {
   selector: 'app-flexible-table-mobile',
   templateUrl: './flexible-table-mobile.component.html',
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
+  host: {'[class]': 'hostClass'},
 })
 export class FlexibleTableMobileComponent extends FlexibleTableBaseComponent {
   // 行の高さ
-  @Input() rowHeight?: string = '180px';
+  @Input() bottomHeight: number = 180;
   // ヘッダ行の高さ
-  @Input() headerHeight?: string = '80px';
+  @Input() topHeight: number = 80;
+  // ヘッダ行の高さ
+  @Input() middleHeight: number = 24;
   // スタイル設定
   @Input() styles: {[key:string]: FlexibleTableMobileColumn} = {}
-
+  // ホスト用クラス設定
+  @Input() hostClass:string = "";
+  
   constructor(
     injector: Injector,
     sanitizer: DomSanitizer,
@@ -49,5 +54,32 @@ export class FlexibleTableMobileComponent extends FlexibleTableBaseComponent {
 
   getBottomColumns(): string[] {
     return this.getVisibleColumns().filter(key => this.styles[key]?.isViewBottom);
+  }
+
+  getWidth(key:string) {
+    if (this.styles[key] && this.styles[key].width) {
+      return this.styles[key].width;
+    } else if (this.styles["*"] && this.styles["*"].width) {
+      return this.styles["*"].width;
+    }
+    return '100px';
+  }
+
+  getRowClass(key:string) {
+    if (this.styles[key] && this.styles[key].rowClass) {
+      return this.styles[key].rowClass;
+    } else if (this.styles["*"] && this.styles["*"].rowClass) {
+      return this.styles["*"].rowClass;
+    }
+    return '';
+  }
+  
+  getRowStyle(key:string) {
+    if (this.styles[key] && this.styles[key].rowStyles) {
+      return this.styles[key].rowStyles;
+    } else if (this.styles["*"] && this.styles["*"].rowStyles) {
+      return this.styles["*"].rowStyles;
+    }
+    return undefined;
   }
 }

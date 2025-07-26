@@ -10,13 +10,21 @@ import loader from '@monaco-editor/loader';
 })
 export class MonacoEditorComponent implements OnInit, OnDestroy {
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef;
-  @Input() value: string = '';
+  @Input() set value(val:string) {
+    this._value = val;
+    if (this.editor && this.editor.getValue() !== this._value) {
+      this.editor.setValue(this._value);
+    }
+  } get value() {
+    return this._value;
+  }
   @Input() language: string = 'sql';
   @Input() theme: string = 'vs';
   @Input() readOnly: boolean = false;
   @Input() fontSize: number = 14;
   @Output() valueChange = new EventEmitter<string>();
 
+  private _value: string = '';
   private editor: monaco.editor.IStandaloneCodeEditor | null = null;
   private resizeObserver: ResizeObserver | null = null;
 
@@ -74,6 +82,7 @@ export class MonacoEditorComponent implements OnInit, OnDestroy {
         this.editor.onDidChangeModelContent(() => {
           if (this.editor) {
             const newValue = this.editor.getValue();
+            this.updateEditorValue(newValue);
             this.valueChange.emit(newValue);
           }
         });
@@ -94,14 +103,10 @@ export class MonacoEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  setValue(value: string) {
-    if (this.editor && this.editor.getValue() !== value) {
-      this.editor.setValue(value);
+  private updateEditorValue(newValue: string) {
+    if (this.editor && this.editor.getValue() !== newValue) {
+      this._value = this.editor.getValue();
     }
-  }
-
-  getValue(): string {
-    return this.editor ? this.editor.getValue() : '';
   }
 
   private initResizeObserver() {

@@ -18,6 +18,9 @@ export class ApiService {
         TOOL_D_SEARCH_TAG: `${this.API_BASE}/tools/d_search_tag`,
         TOOL_BACKUP: `${this.API_BASE}/tools/backup`,
         TOOL_DATABASE: `${this.API_BASE}/tools/database`,
+        BATCH_BOOKMARKS: `${this.API_BASE}/batch/bookmarks`,
+        BATCH_INFO: `${this.API_BASE}/batch/info`,
+        BATCH_EXEC: `${this.API_BASE}/batch/exec`,
         FAVORITE: `${this.API_BASE}/favorite`,
     }
 
@@ -99,5 +102,39 @@ export class ApiService {
     public executeQuery(query:string): Observable<any> {
         const url = new URL(this.urlResource.TOOL_DATABASE, this.API_URL);
         return this.http.post(url.toString(), {query: query});
+    }
+
+    public getBookmarkFile(): Observable<any> {
+        const url = new URL(this.urlResource.BATCH_BOOKMARKS, this.API_URL);
+        return this.http.get(url.toString());
+    }
+
+    public uploadBookmarkFile(file:File): Observable<any> {
+        const url = new URL(this.urlResource.BATCH_BOOKMARKS, this.API_URL);
+        const formData = new FormData();
+
+        formData.append('file', file);
+        return this.http.post(url.toString(), formData);  
+    }
+
+    public deleteBookmarkFile(filename: string): Observable<any> {
+        const url = new URL(`${this.urlResource.BATCH_BOOKMARKS}/${filename}`, this.API_URL);
+        return this.http.delete(url.toString());
+    }
+
+    public getBatchInfoAll(): Observable<any> {
+        const url = new URL(this.urlResource.BATCH_INFO, this.API_URL);
+        return this.http.get(url.toString());
+    }
+
+    public getBatchInfo(jobId:string, lastline:number=0): Observable<any> {
+        const url = new URL(`${this.urlResource.BATCH_INFO}/${jobId}`, this.API_URL);
+        url.searchParams.append('lastline', lastline.toString());
+        return this.http.get(url.toString());
+    }
+
+    public executeBatch(key:string): Observable<any> {
+        const url = new URL(this.urlResource.BATCH_EXEC, this.API_URL);
+        return this.http.post(url.toString(), {batchname: key});
     }
 }

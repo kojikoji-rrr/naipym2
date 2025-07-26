@@ -37,13 +37,18 @@ export interface InjectedData {
 })
 export class FlexibleTableBaseComponent {
   // 表示データ
-  @Input() data: Array<{[key:string]: any}> = [];
+  _data: Array<{[key:string]: any}> = [];
+  @Input() set data(value:any) {
+    var before = {...this._data};
+    this._data = value;
+    this.onChangeData(before);
+  } get data(): Array<{[key:string]: any}> {
+    return this._data;
+  }
   // ヘッダラベル
   @Input() thLabels: {[key:string]: FlexibleTableColumn} = {}
   // 非表示カラム
   @Input() hideColumns: Array<string> = [];
-  // キー項目
-  @Input() trackByKeys: Array<string> = [];
   // データが無くても表示する項目
   @Input() forcefulColumns: Array<string> = [];
   // ソート初期値
@@ -64,6 +69,8 @@ export class FlexibleTableBaseComponent {
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef
   ) {}
+
+  onChangeData(before: Array<{[key:string]: any}>) {}
 
   onChangeSort(key: string) {
     // ソートキー追加（新しいオブジェクトを作成）
@@ -106,16 +113,7 @@ export class FlexibleTableBaseComponent {
   }
   
   trackByFn(index: number, row: { [key: string]: any }): any {
-    // 事前計算済みIDがある場合は優先使用
-    if (row['_cachedId']) {
-      return row['_cachedId'];
-    }
-    
-    if (this.trackByKeys && this.trackByKeys.length > 0) {
-      const keyValue = this.trackByKeys.map(key => row[key]).join('_');
-      return keyValue ?? index;
-    }
-    return index;
+    return row['trackByKey'] ?? Object.values(row).filter((val)=> ['string','number'].includes(typeof val)).join("_");
   }
 
   getVisibleColumns(): string[] {
@@ -180,7 +178,6 @@ export class FlexibleTableBaseComponent {
     return this.sanitizer.bypassSecurityTrustHtml(htmlString);
   }
 
-  // キャッシュ付きSafeHTML取得
   getCachedSafeHtml(htmlString: string): SafeHtml {
     const cacheKey = String(htmlString);
     if (!this.safeHtmlCache.has(cacheKey)) {
@@ -189,7 +186,6 @@ export class FlexibleTableBaseComponent {
     return this.safeHtmlCache.get(cacheKey)!;
   }
 
-  // Injectorキャッシュをクリア
   clearInjectorCache() {
     this.injectorCache.clear();
     this.cdr.detectChanges();

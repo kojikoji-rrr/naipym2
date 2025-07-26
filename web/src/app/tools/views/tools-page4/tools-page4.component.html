@@ -2,9 +2,13 @@
 <ng-template #sideMenuContent>
   <div class="p-4">
     <h3 class="label-sidemenu-title">ツールメニュー</h3>
-    <ul class="space-y-2">
-      特になし４
-    </ul>
+    <sidemenu-contents-section [title]="'SELECTテンプレート'">
+      <div class="grid grid-cols-2 gap-1">
+        @for (tableName of tableNames; track tableName) {
+          <button class="button-secondary button-x-small flex items-center" (click)="getSQLBySelectTable(tableName)">{{tableName}}</button>
+        }
+      </div>
+    </sidemenu-contents-section>
   </div>
 </ng-template>
 
@@ -45,7 +49,7 @@
         <div class="flex flex-col min-w-0 h-full">
           <!-- SQL入力エリア -->
           <div class="div-border p-2 flex-1 mb-2 min-w-0 overflow-hidden">
-            <app-monaco-editor [language]="'sql'" [theme]="'vs'" #editor> </app-monaco-editor>
+            <app-monaco-editor [language]="'sql'" [theme]="'vs'" [value]="editorValue" (valueChange)="onEditorValueChange($event)" #editor> </app-monaco-editor>
           </div>
           <!-- 実行ボタン -->
           <div class="flex gap-2 justify-end flex-shrink-0">
@@ -69,7 +73,7 @@
           @if (selectResult.length === 1) {
             <div class="div-border p-2 h-80">
               <div class="h-full w-full overflow-auto">
-                <app-flexible-table-desktop [data]="selectResult[0]" [hostClass]="'text-xs'"></app-flexible-table-desktop>
+                <app-flexible-table-desktop-vscroll [data]="selectResult[0]" [hostClass]="'text-xs'" [styles]="{'*': {colClass:'px-2'}}"></app-flexible-table-desktop-vscroll>
               </div>
             </div>
           }
@@ -79,7 +83,7 @@
               <app-local-tabs #localTabsRef>
                 @for (result of selectResult; track $index; let i = $index) {
                   <div class="h-full w-full overflow-auto" [id]="`result-${$index}`" #tabContent>
-                    <app-flexible-table-desktop [data]="result" [hostClass]="'text-xs'"></app-flexible-table-desktop>
+                    <app-flexible-table-desktop-vscroll [data]="result" [hostClass]="'text-xs'" [styles]="{'*': {colClass:'px-2'}}"></app-flexible-table-desktop-vscroll>
                   </div>
                 }
               </app-local-tabs>
@@ -92,25 +96,61 @@
   <!-- モバイル用レイアウト -->
   <div class="md:hidden flex flex-col gap-2">
     <!-- テーブル一覧 -->
-    <div class="div-border p-2 flex-1">
-      aaa
+    <div class="div-border p-2 overflow-y-auto">
+      <div class="max-h-56">
+        <app-content-spinner [showSpinner]="isLoading">
+          <app-notification #notice></app-notification>
+          @for (table of tableList | keyvalue; track table.key) {
+            <!-- 各テーブル情報 -->
+            <app-panel-layout [title]="table.key" [accordion]="false" [panelClass]="'mb-2'">
+              <app-flexible-table-desktop
+                [data]="table.value"
+                [thLabels]="tableListLabels"
+                [styles]="tableListStyles"
+                [hostClass]="'text-xs'"
+                [nonOutBorder]="true">
+              </app-flexible-table-desktop>
+            </app-panel-layout>
+          }
+        </app-content-spinner>
+      </div>
     </div>
     <!-- SQL入力エリア -->
-    <div class="div-border p-2 flex-1">
-      iii
+    <div class="div-border p-2 h-56 mb-2 min-w-0 overflow-hidden">
+      <app-monaco-editor [language]="'sql'" [theme]="'vs'" [fontSize]="10" [value]="editorValue" (valueChange)="onEditorValueChange($event)" #editor> </app-monaco-editor>
     </div>
     <!-- 実行ボタン -->
     <div class="flex gap-2 justify-end flex-shrink-0">
-      <button class="button-secondary button-large w-24">クリア</button>
-      <button class="button-primary button-large w-24">実行</button>
+      <button class="button-secondary button-small w-24" [disabled]="isExecute" (click)="clearLog()">ログクリア</button>
+      <button class="button-secondary button-small w-24" (click)="clearQuery()">クリア</button>
+      <button class="button-primary button-small w-24" (click)="execute()">実行</button>
     </div>
     <!-- 実行結果 -->
-    <div class="div-border p-2 flex-1">
-      uuu
+    <div class="div-border p-2 overflow-y-hidden bg-amber-50 h-32">
+      <textarea class="w-full h-full bg-inherit resize-none p-2 font-mono text-xs focus:outline-none focus:ring-0 focus:ring-offset-0 focus:border-transparent" readonly placeholder="実行ログはありません。" [value]="queryLogs"></textarea>
     </div>
     <!-- SELECT結果 -->
-    <div class="div-border p-2 flex-1">
-      uuu
-    </div>
+    @if (selectResult) {
+      <!-- SELECT実行結果が1件の場合 -->
+      @if (selectResult.length === 1) {
+        <div class="div-border h-56">
+          <div class="h-full w-full overflow-auto">
+            <app-flexible-table-desktop-vscroll [data]="selectResult[0]" [hostClass]="'text-xs'" [styles]="{'*': {colClass:'px-2'}}"></app-flexible-table-desktop-vscroll>
+          </div>
+        </div>
+      }
+      <!-- SELECT実行結果が2件以上の場合 -->
+      @else {
+        <div class="div-border h-56">
+          <app-local-tabs #localTabsRef>
+            @for (result of selectResult; track $index; let i = $index) {
+              <div class="h-full w-full overflow-auto" [id]="`result-${$index}`" #tabContent>
+                <app-flexible-table-desktop-vscroll [data]="result" [hostClass]="'text-xs'" [styles]="{'*': {colClass:'px-2'}}"></app-flexible-table-desktop-vscroll>
+              </div>
+            }
+          </app-local-tabs>
+        </div>
+      }
+    }
   </div>
 </div>

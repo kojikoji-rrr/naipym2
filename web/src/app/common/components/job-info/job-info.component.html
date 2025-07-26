@@ -1,0 +1,21 @@
+<div class="div-border text-sm p-2 space-y-2" [class]="class">
+    @if (!data) {
+        <p>ジョブの実行結果がありません。</p>
+    } @else {
+        <div class="flex justify-between">
+            <p>ジョブID: <span class="pl-2 font-mono">{{data['job_id']}}</span></p>
+            <p><span [ngClass]="getStatusBudge()" class="mr-2">{{data['status']}}</span></p>
+        </div>
+        <div class="flex gap-x-4">
+            <p>開始日時: <span class="pl-2"><app-time-badge>{{data['started_at']}}</app-time-badge></span></p>
+            @if (data['stopped_at']) {
+                <p>終了日時: <span class="pl-2"><app-time-badge>{{data['stopped_at']}}</app-time-badge></span></p>
+            }
+        </div>
+        <div class="flex gap-4">
+            @if (data['message']) {
+                <p>メッセージ: <span class="pl-2 font-mono">{{data['message']}}</span></p>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,84 @@
+<div class="h-full w-full">
+  <!-- サイドメニュー -->
+  <ng-template #sideMenuContent>
+    <div class="p-4">
+      <h3 class="label-sidemenu-title">バッチ操作ページメニュー</h3>
+    </div>
+  </ng-template>
+  <!-- ページヘッダー -->
+  <app-page-header [title]="'バッチ操作'"></app-page-header>
+  <!-- メインコンテンツ -->
+  <div class="pb-16">
+    <!-- ブックマークファイルアップロード -->
+    <div class="mb-4">
+      <h4 class="text-lg font-medium mb-3">ブックマークファイルアップロード</h4>
+      <app-notification #uploadNotice></app-notification>
+      <!-- アップロード枠 -->
+      <app-content-spinner [showSpinner]="isUploadingBookmarkUpload" [showContentAlways]="true">
+        <app-fileupload-container [disabled]="this.isUploadingBookmarkUpload" (onUpload)="uploadBookmark($event)" #bookmarkUpload></app-fileupload-container>
+      </app-content-spinner>
+      <!-- バックアップリスト -->
+      <div>
+        <app-notification #listNotice></app-notification>
+        <app-content-spinner [showSpinner]="isLoadingBookmarkUpload || isDeletingBookmarkUpload" [showContentAlways]="true">
+          <div class="overflow-x-auto">
+            <app-flexible-table-desktop
+              [data]="bookmarkList"
+              [thLabels]="bookmarkListLabels"
+              [styles]="bookmarkListStyles"
+              [forcefulColumns]="bookmarkListMusts"
+              [parentComponent]="this">
+            </app-flexible-table-desktop>
+          </div>
+        </app-content-spinner>
+      </div>
+    </div>
+    <app-content-spinner [showSpinner]="initializeBatch" [showContentAlways]="true">
+      <app-notification #initializeBatchNotice></app-notification>
+      <div class="mb-4">
+        <h4 class="text-lg font-medium mb-3">ブックマークフェッチ</h4>
+        <div class="flex gap-2 justify-between items-end">
+          <div></div>
+          <button class="button-primary button-large" [disabled]="isExecute('fetchBookmark')" (click)="executeBatch('fetchBookmark')">実行</button>
+        </div>
+        <app-job-info [data]="batchExecInfo['fetchBookmark']" [class]="'my-2'"></app-job-info>
+        <app-scheduled-exec [sec]="1" (exec)="getBatchInfo('fetchBookmark')" [run]="isExecute('fetchBookmark')">
+          
+        </app-scheduled-exec>
+      </div>
+      <div class="mb-4">
+        <h4 class="text-lg font-medium mb-3">再フェッチ</h4>
+        <div class="flex gap-2 justify-between items-end">
+          <div></div>
+          <button class="button-primary button-large" [disabled]="isExecute('reFetch')" (click)="executeBatch('reFetch')">実行</button>
+        </div>
+        <app-job-info [data]="batchExecInfo['reFetch']" [class]="'my-2'"></app-job-info>
+        <app-scheduled-exec [sec]="1" (exec)="getBatchInfo('reFetch')" [run]="isExecute('reFetch')">
+          テスト
+        </app-scheduled-exec>
+      </div>
+      <div>
+        <h4 class="text-lg font-medium mb-3">画像生成</h4>
+        <div class="flex gap-2 justify-between items-end">
+          <div></div>
+          <button class="button-primary button-large" [disabled]="isExecute('generateImage')" (click)="executeBatch('generateImage')">実行</button>
+        </div>
+        <app-job-info [data]="batchExecInfo['generateImage']" [class]="'my-2'"></app-job-info>
+        <app-scheduled-exec [sec]="1" (exec)="getBatchInfo('generateImage')" [run]="isExecute('generateImage')">
+          テスト
+        </app-scheduled-exec>
+      </div>
+      <div class="mb-4">
+        <h4 class="text-lg font-medium mb-3">サンプルバッチ</h4>
+        <div class="flex gap-2 justify-between items-end">
+          <div></div>
+          <button class="button-primary button-large" [disabled]="isExecute('sampleBatch')" (click)="executeBatch('sampleBatch')">実行</button>
+        </div>
+        <app-job-info [data]="batchExecInfo['sampleBatch']" [class]="'my-2'"></app-job-info>
+        <app-scheduled-exec [sec]="1" (exec)="getBatchInfo('sampleBatch')" [run]="isExecute('sampleBatch')">
+          テスト
+        </app-scheduled-exec>
+      </div>
+    </app-content-spinner>
+  </div>
+</div>

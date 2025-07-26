@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import API_BASE
 
 from src.artists.artist_routers import router as artists
+from src.batch.batch_routers import router as batch
 from src.tools.tools_routers import router as tools
 from src.common.common_routers import router as common
 
@@ -21,5 +22,6 @@ app.add_middleware(
 )
 
 app.include_router(artists)
+app.include_router(batch)
 app.include_router(tools)
 app.include_router(common)

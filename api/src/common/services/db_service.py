@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import sqlalchemy
@@ -8,6 +9,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from typing import Dict
 
 Base = declarative_base()
+
+JST = timezone(timedelta(hours=9))
+def now():
+    return datetime.now(JST).strftime('%Y-%m-%d %H:%M:%S')
 
 class DBService:
     def __init__(self, path):

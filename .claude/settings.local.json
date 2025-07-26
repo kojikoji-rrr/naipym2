@@ -23,7 +23,8 @@
       "Bash(done)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

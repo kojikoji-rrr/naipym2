@@ -12,12 +12,12 @@
           <div class="border-b border-gray-200 overflow-x-auto">
             <div class="flex text-xs mb-2">
               @for (key of getTopColumns(); track key) {
-                <div class="flex flex-col" [style]="{'min-width': (styles[key] && styles[key].width) || '100px', 'height': headerHeight}">
+                <div class="flex flex-col flex-1" [style.min-width]="getWidth(key)" [style.height.px]="topHeight">
                   <span class="w-full text-gray-500 mb-1 cursor-pointer hover:text-gray-700 text-center" (click)="onChangeSort(key)">
                     @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
                     <span class="align-middle ml-1"> @if (sortedColumns[key] === true) {▲} @else if (sortedColumns[key] === false) {▼} </span>
                   </span>
-                  <div class="w-full h-full text-gray-900" [ngClass]="(styles[key] && styles[key].rowClass) || ''" [ngStyle]="(styles[key] && styles[key].rowStyles) || undefined">
+                  <div class="w-full h-full text-gray-900" [ngClass]="getRowClass(key)" [ngStyle]="getRowStyle(key)">
                     @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                       @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                         <div class="w-full h-full">
@@ -39,7 +39,7 @@
         @if (getMiddleColumns().length) {
           <div class="flex">
             @for(key of getMiddleColumns(); track key; let isLast = $last) {
-              <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
+              <div class="flex-1 flex items-center justify-center w-full p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast" [style.height.px]="middleHeight">
                 @if(forcefulColumns.includes(key) || row[key] !== undefined) {
                   @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                     <div class="w-full">
@@ -55,9 +55,9 @@
         }
         <!-- 下データ情報 -->
         @if (getBottomColumns().length) {
-          <div class="flex" [style]="{height: rowHeight}">
+          <div class="flex">
             @for (key of getBottomColumns(); track key; let isLast = $last) {
-              <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast">
+              <div class="flex-1 flex items-center justify-center p-1" [class.border-r]="!isLast" [class.border-gray-200]="!isLast" [style.height.px]="bottomHeight">
                 @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                   @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
                     <div class="w-full h-full">

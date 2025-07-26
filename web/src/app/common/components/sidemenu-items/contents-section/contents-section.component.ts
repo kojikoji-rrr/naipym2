@@ -8,6 +8,4 @@ import { Component, Input } from "@angular/core";
 })
 export class ContentsSectionComponent {
     @Input() title?:string;
-    @Input() type:'flex' | 'grid' = 'flex';
-    @Input() col:number = 1;
 }

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, Boolean
 from sqlalchemy.sql import func
 
-from src.common.services.db_service import Base
+from src.common.services.db_service import Base, now
 
 class GenerateData(Base):
     __tablename__ = 'generate_data'
@@ -13,5 +13,5 @@ class GenerateData(Base):
     char_prompt = Column(Text)
     image_path = Column(Text)
     image_name = Column(Text)
-    created_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
+    created_at = Column(Text, nullable=False, default=now())
     is_delete = Column(Boolean, default=0)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, Boolean
 from sqlalchemy.sql import func
 
-from src.common.services.db_service import Base
+from src.common.services.db_service import Base, now
 
 class TagData(Base):
     __tablename__ = 'tag_data'
@@ -10,6 +10,6 @@ class TagData(Base):
     tag = Column(Text, nullable=False)
     domain = Column(Text, nullable=False)
     type = Column(Text, nullable=False)
-    created_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
-    updated_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
+    created_at = Column(Text, nullable=False, default=now())
+    updated_at = Column(Text, nullable=False, default=now())
     is_delete = Column(Boolean, default=0)

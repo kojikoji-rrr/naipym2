@@ -10,16 +10,18 @@
         </button>
       </app-label-one-content>
       <!-- 表示切替 -->
-      <sidemenu-contents-section [title]="'表示切替'" [type]="'grid'" [col]="2">
-        @for (key of getHideableColumns(); track key) {
-          <label class="flex items-center">
-            <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [checked]="!hideColumns.includes(key)" (change)="toggleColumnVisibility(key)">
-            <span class="text-xs">{{labels[key].label}}</span>
-          </label>
-        }
+      <sidemenu-contents-section [title]="'キーワード検索'">
+        <div class="grid grid-cols-2 gap-1">
+          @for (key of getHideableColumns(); track key) {
+            <label class="flex items-center">
+              <input type="checkbox" class="mr-1 h-3 w-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500" [checked]="!hideColumns.includes(key)" (change)="toggleColumnVisibility(key)">
+              <span class="text-xs">{{labels[key].label}}</span>
+            </label>
+          }
+        </div>
       </sidemenu-contents-section>
       <!-- キーワード検索 -->
-      <sidemenu-contents-section [title]="'キーワード検索'" [type]="'flex'">
+      <sidemenu-contents-section [title]="'キーワード検索'">
         <div class="grid grid-cols-3 gap-1">
           <sidemenu-checkbox [label]="'memo'" [(checked)]="props.keywordByMemo"></sidemenu-checkbox>
           <sidemenu-checkbox [label]="'他名称'" [(checked)]="props.keywordByOtherName"></sidemenu-checkbox>
@@ -105,11 +107,10 @@
             [data]="data"
             [thLabels]="labels"
             [hideColumns]="hideColumns"
-            [trackByKeys]="trackByKeys"
             [sortedColumns]="sort"
             [styles]="desktopStyles"
             [parentComponent]="this"
-            [rowHeight]="'280px'"
+            [rowHeight]="280"
             (sortEvent)="onChangeSort($event)">
           </app-flexible-table-desktop>
         </div>
@@ -119,11 +120,11 @@
             [data]="data"
             [thLabels]="labels"
             [hideColumns]="hideColumns"
-            [trackByKeys]="trackByKeys"
             [sortedColumns]="sort"
             [styles]="mobileStyles"
             [parentComponent]="this"
-            [rowHeight]="'280px'"
+            [middleHeight]="48"
+            [bottomHeight]="280"
             (sortEvent)="onChangeSort($event)">
           </app-flexible-table-mobile>
         </div>

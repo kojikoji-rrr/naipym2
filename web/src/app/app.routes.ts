@@ -13,6 +13,8 @@ import { ToolsPage3Component } from './tools/views/tools-page3/tools-page3.compo
 import { ToolsPage4Component } from './tools/views/tools-page4/tools-page4.component';
 import { ToolsPage5Component } from './tools/views/tools-page5/tools-page5.component';
 import { TabPage4Component } from './sandbox/views/tab-page4/tab-page4.component';
+import { BatchComponent } from './batch/batch.component';
+import { BatchManagerComponent } from './batch-manager/batch-manager.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +27,14 @@ export const routes: Routes = [
   {
     path: 'tags',
     component: TagsComponent
+  },
+  {
+    path: 'batch',
+    component: BatchComponent
+  },
+  {
+    path: 'batch-manager',
+    component: BatchManagerComponent
   },
   { 
     path: 'tools', 

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, Boolean
 from sqlalchemy.sql import func
 
-from src.common.services.db_service import Base
+from src.common.services.db_service import Base, now
 
 class ArtistData(Base):
     __tablename__ = 'artist_data'
@@ -12,5 +12,5 @@ class ArtistData(Base):
     post_count = Column(Integer, nullable=False, default=0)
     is_banned = Column(Boolean)
     is_deleted = Column(Boolean)
-    created_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
-    updated_at = Column(Text, nullable=False, default=func.datetime('now', 'localtime'))
+    created_at = Column(Text, nullable=False, default=now())
+    updated_at = Column(Text, nullable=False, default=now())

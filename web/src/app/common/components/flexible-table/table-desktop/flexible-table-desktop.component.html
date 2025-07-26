@@ -3,8 +3,8 @@
     <tr class="bg-gray-50">
       @for (key of getVisibleColumns(); track key) {
         <th class="cursor-pointer text-gray-500 tracking-wider border-b hover:bg-gray-100" 
-            [ngClass]="styles[key] && styles[key].colClass"
-            [style.width]="styles[key] && styles[key].width ? styles[key].width : 'auto'"
+            [ngClass]="getColClass(key)"
+            [style.width]="getWidth(key)"
             (click)="onChangeSort(key)">
           @if (thLabels.hasOwnProperty(key)) { {{thLabels[key].label}} } @else { {{key}} }
           <span class="align-middle text-xs">
@@ -23,13 +23,13 @@
       </tr>
     } @else {
       @for (row of data; track trackByFn($index, row)) {
-        <tr class="hover:bg-gray-50" [style.height]="rowHeight || 'auto'">
+        <tr class="hover:bg-gray-50" [style.height.px]="rowHeight">
           @for (key of getVisibleColumns(); track key) {
             <td
-              [style.width]="styles[key] && styles[key].width ? styles[key].width : 'auto'"
-              [style.height]="rowHeight || 'auto'"
-              [ngClass]="styles[key] && styles[key].rowClass"
-              [ngStyle]="styles[key] && styles[key].rowStyle"
+              [style.width]="getWidth(key)"
+              [style.height.px]="rowHeight"
+              [ngClass]="getRowClass(key)"
+              [ngStyle]="getRowStyle(key)"
               class="p-0">
               @if (forcefulColumns.includes(key) || row[key] !== undefined) {
                 @if (thLabels.hasOwnProperty(key) && thLabels[key].component) {
